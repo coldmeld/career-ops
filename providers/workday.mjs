@@ -15,17 +15,36 @@ const PAGE_SIZE = 20;
 const MAX_PAGES = 50; // safety cap — at most 1000 postings per site
 
 function resolveEndpoint(entry) {
+  // Primary: extract tenant/instance/site from a *.myworkdayjobs.com careers_url
   const url = entry.careers_url || '';
   const m = url.match(/^https:\/\/([\w-]+)\.(wd[\w-]*)\.myworkdayjobs\.com\/(?:[a-z]{2}-[A-Z]{2}\/)?([^/?#]+)/);
-  if (!m) return null;
-  const [, tenant, instance, site] = m;
-  const origin = `https://${tenant}.${instance}.myworkdayjobs.com`;
-  return {
-    api: `${origin}/wday/cxs/${tenant}/${site}/jobs`,
-    // externalPath is relative to the site, not the host root — without the
-    // site segment the URL 404s.
-    jobBase: `${origin}/${site}`,
-  };
+  if (m) {
+    const [, tenant, instance, site] = m;
+    const origin = `https://${tenant}.${instance}.myworkdayjobs.com`;
+    return {
+      api: `${origin}/wday/cxs/${tenant}/${site}/jobs`,
+      // externalPath is relative to the site, not the host root — without the
+      // site segment the URL 404s.
+      jobBase: `${origin}/${site}`,
+    };
+  }
+
+  // Fallback: explicit workday_tenant + workday_board fields for companies that
+  // front Workday behind a custom domain (e.g. jobs.shell.com).
+  if (entry.workday_tenant && entry.workday_board) {
+    const tm = entry.workday_tenant.match(/^([\w-]+)\.(wd[\w-]*)\.myworkdayjobs\.com$/);
+    if (tm) {
+      const [, tenant] = tm;
+      const origin = `https://${entry.workday_tenant}`;
+      const site = entry.workday_board;
+      return {
+        api: `${origin}/wday/cxs/${tenant}/${site}/jobs`,
+        jobBase: `${origin}/${site}`,
+      };
+    }
+  }
+
+  return null;
 }
 
 function parsePostedOn(label) {
