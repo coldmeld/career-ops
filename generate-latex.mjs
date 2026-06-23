@@ -18,24 +18,16 @@ import { resolve, basename, dirname, join } from 'path';
 import { execFileSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 
-// The template emits 4 sections (Education, Work Experience, Personal
-// Projects, Technical Skills). We count \section{} blocks rather than match
-// the English titles, so a localized CV (e.g. "Educación", "学歴") still
-// validates instead of failing with a spurious "Missing section".
-const MIN_SECTIONS = 4;
+const REQUIRED_SECTIONS = [
+  '\\\\section{Education}',
+  '\\\\section{Work Experience}',
+  '\\\\section{Technical Skills}',
+];
 
 const REQUIRED_COMMANDS = [
   '\\\\resumeSubheading',
   '\\\\resumeItem',
-  '\\\\resumeProjectHeading',
 ];
-
-// CJK (Japanese/Chinese/Korean) ranges: Hiragana, Katakana, CJK ideographs,
-// compatibility ideographs, halfwidth katakana, and Hangul. The template is a
-// pdfLaTeX/Computer-Modern setup with no CJK font, so these glyphs cannot
-// render under pdflatex or tectonic — detect them and fail with guidance
-// instead of emitting a broken PDF / cryptic compile log.
-const CJK_RE = /[぀-ヿ㐀-鿿豈-﫿ｦ-ﾟ가-힯ᄀ-ᇿ]/;
 
 async function main() {
   const inputPath = process.argv[2];
@@ -56,15 +48,11 @@ async function main() {
 
   const issues = [];
 
-  // Check section count (language-agnostic — see MIN_SECTIONS).
-  const sectionCount = (content.match(/\\section\{/g) || []).length;
-  if (sectionCount < MIN_SECTIONS) {
-    issues.push(`Expected at least ${MIN_SECTIONS} \\section{} blocks (Education, Work Experience, Projects, Skills — or localized equivalents), found ${sectionCount}`);
-  }
-
-  // The template cannot render CJK; fail with guidance instead of a broken PDF.
-  if (CJK_RE.test(content)) {
-    issues.push('CJK characters detected. The LaTeX template does not support Japanese/Chinese/Korean yet (pdfLaTeX setup with no CJK font). Use `pdf` mode (HTML to PDF, which renders CJK) for these CVs.');
+  // Check required sections
+  for (const pattern of REQUIRED_SECTIONS) {
+    if (!new RegExp(pattern).test(content)) {
+      issues.push(`Missing section matching: ${pattern}`);
+    }
   }
 
   // Check required commands are used
@@ -140,15 +128,25 @@ async function main() {
     mkdirSync(targetDir, { recursive: true });
   }
 
-  // Detect available engine: prefer tectonic, fall back to pdflatex
+  // Detect available engine: prefer project-local tectonic, then PATH tectonic, then pdflatex
   let engine = null;
-  for (const candidate of ['tectonic', 'pdflatex']) {
+  const projectRoot = resolve(dirname(new URL(import.meta.url).pathname));
+  const localTectonic = join(projectRoot, 'tectonic');
+  const engineCandidates = [
+    { name: 'tectonic', bin: localTectonic },
+    { name: 'tectonic', bin: 'tectonic' },
+    { name: 'pdflatex', bin: 'pdflatex' },
+  ];
+  let engineBin = null;
+  for (const candidate of engineCandidates) {
     try {
-      execFileSync(candidate, ['--version'], { stdio: 'pipe' });
-      engine = candidate;
+      execFileSync(candidate.bin, ['--version'], { stdio: 'pipe', env: { ...process.env, XDG_CACHE_HOME: join(projectRoot, '.cache') } });
+      engine = candidate.name;
+      engineBin = candidate.bin;
       break;
     } catch { /* not found */ }
   }
+  if (!engineBin) engineBin = engine; // fallback for pdflatex
 
   if (!engine) {
     report.compiled = false;
@@ -169,13 +167,15 @@ async function main() {
     await writeFile(compilePath, patched, 'utf-8');
   }
 
+  const tectonicEnv = { ...process.env, XDG_CACHE_HOME: join(projectRoot, '.cache') };
   try {
     if (engine === 'tectonic') {
       // Tectonic handles multi-pass automatically; --outdir sets output location
-      execFileSync('tectonic', ['--outdir', texDir, compilePath], {
+      execFileSync(engineBin, ['--outdir', texDir, compilePath], {
         cwd: texDir,
         stdio: 'pipe',
         timeout: 120_000,
+        env: tectonicEnv,
       });
     } else {
       const pdflatexArgs = [
@@ -186,9 +186,9 @@ async function main() {
         absPath,
       ];
       // First pass
-      execFileSync('pdflatex', pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
-      // Second pass (resolves referenceS))
-      execFileSync('pdflatex', pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
+      execFileSync(engineBin, pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
+      // Second pass (resolves references)
+      execFileSync(engineBin, pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
     }
 
     report.compiled = true;

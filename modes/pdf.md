@@ -61,6 +61,11 @@ Examples of legitimate reformulation:
 
 **NEVER add skills that the candidate does not have. Only reword real experience using the exact JD vocabulary.**
 
+## Content exclusion rules
+
+- **No relevant coursework.** Never include a "Relevant Coursework" line or list in the Education section.
+- **No personal projects from employment.** The Projects section must only include standalone projects (open source, side projects, portfolio). Do NOT include projects that were done as part of a job role — those belong as bullets under Work Experience.
+
 ## Template HTML
 
 Use the template in `cv-template.html`. Replace the `{{...}}` placeholders with personalized content:
