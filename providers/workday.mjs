@@ -79,6 +79,7 @@ export default {
       });
       const json = await ctx.fetchJson(ep.api, {
         method: 'POST',
+        redirect: 'error',
         body,
         headers: { 'content-type': 'application/json', accept: 'application/json' },
       });
