@@ -90,3 +90,7 @@ package-lock.json
 
 # Planning (local scratchpad)
 plan/
+CLAUDE.md
+AGENTS.md
+modes/pdf.md
+modes/latex.md
