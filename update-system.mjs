@@ -657,11 +657,22 @@ async function apply() {
       console.log('npm install skipped (may need manual run)');
     }
 
-    // 5b. Ensure Playwright browser binary is up to date after npm install
+    // 5b. Ensure Playwright browser binary is up to date after npm install.
+    // Skip if the current binary already launches — avoids redundant installs
+    // that trigger unnecessary permission prompts on every update.
     try {
-      execSync('npx playwright install chromium', { cwd: ROOT, timeout: 120000, stdio: 'ignore' });
+      const pwCheck = execSync(
+        'node -e "import(\'playwright\').then(({chromium})=>chromium.launch({headless:true})).then(b=>b.close()).then(()=>process.exit(0)).catch(()=>process.exit(1))"',
+        { cwd: ROOT, timeout: 15000, stdio: 'ignore' }
+      );
+      // exit 0 = already working, skip install
     } catch {
-      console.log('playwright install skipped (run manually: npx playwright install chromium)');
+      // non-zero exit = not working, install
+      try {
+        execSync('npx playwright install chromium', { cwd: ROOT, timeout: 120000, stdio: 'ignore' });
+      } catch {
+        console.log('playwright install skipped (run manually: npx playwright install chromium)');
+      }
     }
 
     // 6. Rebuild compiled dashboard if Go sources changed

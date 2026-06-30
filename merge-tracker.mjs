@@ -765,7 +765,7 @@ if (newLines.length > 0) {
   // Find header separator (|---|...) and insert after it
   let insertIdx = -1;
   for (let i = 0; i < appLines.length; i++) {
-    if (appLines[i].includes('---') && appLines[i].startsWith('|')) {
+    if (appLines[i].startsWith('|') && /^\|[-|: ]+\|$/.test(appLines[i].trim())) {
       insertIdx = i + 1;
       break;
     }

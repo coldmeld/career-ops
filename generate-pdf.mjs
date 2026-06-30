@@ -10,6 +10,9 @@
  * Uses Chromium headless to render the HTML and produce a clean, ATS-parseable PDF.
  */
 
+// Subagents don't inherit the parent shell's env; ensure Playwright can find its browsers.
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH) process.env.PLAYWRIGHT_BROWSERS_PATH = '/ms-playwright';
+
 import { chromium } from 'playwright';
 import { resolve, dirname, relative, isAbsolute } from 'path';
 import { readFile } from 'fs/promises';

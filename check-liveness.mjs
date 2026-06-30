@@ -14,6 +14,9 @@
  * Exit code: 0 if all active, 1 if any expired or uncertain
  */
 
+// Subagents don't inherit the parent shell's env; ensure Playwright can find its browsers.
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH) process.env.PLAYWRIGHT_BROWSERS_PATH = '/ms-playwright';
+
 import { chromium } from 'playwright';
 import { readFile } from 'fs/promises';
 import {

@@ -140,6 +140,11 @@ async function main() {
     mkdirSync(targetDir, { recursive: true });
   }
 
+  // Ensure tectonic can write its cache when ~/.cache is not writable
+  if (!process.env.XDG_CACHE_HOME) {
+    process.env.XDG_CACHE_HOME = '/home/node/.local-cache';
+  }
+
   // Detect available engine: prefer tectonic, fall back to pdflatex
   let engine = null;
   for (const candidate of ['tectonic', 'pdflatex']) {
