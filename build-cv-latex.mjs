@@ -54,10 +54,10 @@ function buildEducation(entries) {
   const blocks = [];
   for (const e of entries) {
     if (!e) continue;
-    let block = `    \\resumeSubheading\n      {${escapeLatex(e.institution)}}{${escapeLatex(e.location)}}\n      {${escapeLatex(e.degree)}}{${escapeLatex(e.dates)}}`;
+    let block = `    \\resumeSubheading\n      {${escapeLatex(e.institution)}}{${escapeLatex(e.dates)}}\n      {${escapeLatex(e.degree)}}{${escapeLatex(e.location)}}`;
     if (Array.isArray(e.coursework) && e.coursework.length > 0) {
-      const courses = e.coursework.map(c => escapeLatex(c)).join(', ');
-      block += `\n        \\resumeItemListStart\n            \\resumeItem{\\textbf{Coursework:} ${courses}}\n        \\resumeItemListEnd`;
+      const items = e.coursework.map(c => `            \\resumeItem{${escapeLatex(c)}}`).join('\n');
+      block += `\n        \\resumeItemListStart\n${items}\n        \\resumeItemListEnd`;
     }
     blocks.push(block);
   }
@@ -85,6 +85,11 @@ function buildProjects(entries) {
     blocks.push(`    \\resumeProjectHeading\n      {\\textbf{${escapeLatex(e.name)}}${context}}{${escapeLatex(e.dates)}}\n      \\resumeItemListStart\n${bullets}\n      \\resumeItemListEnd`);
   }
   return blocks.join('\n\n');
+}
+
+function buildCompetencies(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+  return items.map(c => escapeLatex(c)).join(' $|$ ');
 }
 
 function buildSkills(categories) {
@@ -159,6 +164,8 @@ async function main() {
     LINKEDIN_DISPLAY: escapeLatex(linkedinDisplay),
     GITHUB_URL: githubUrl,
     GITHUB_DISPLAY: escapeLatex(githubDisplay),
+    SUMMARY_TEXT: escapeLatex(payload.summary_text || ''),
+    COMPETENCIES: buildCompetencies(payload.competencies),
     EDUCATION: buildEducation(payload.education),
     EXPERIENCE: buildExperience(payload.experience),
     PROJECTS: buildProjects(payload.projects),
