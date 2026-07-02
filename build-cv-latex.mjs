@@ -49,6 +49,16 @@ function sanitizeUrl(url) {
   return url;
 }
 
+function buildSummary(text) {
+  if (!text) return '';
+  return escapeLatex(text);
+}
+
+function buildCompetencies(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+  return items.map(item => `\\textbf{${escapeLatex(item)}}`).join(' $\\cdot$ ');
+}
+
 function buildEducation(entries) {
   if (!Array.isArray(entries) || entries.length === 0) return '';
   const blocks = [];
@@ -84,7 +94,7 @@ function buildProjects(entries) {
     const bullets = Array.isArray(e.bullets) ? e.bullets.map(b => `            \\resumeItem{${escapeLatex(b)}}`).join('\n') : '';
     blocks.push(`    \\resumeProjectHeading\n      {\\textbf{${escapeLatex(e.name)}}${context}}{${escapeLatex(e.dates)}}\n      \\resumeItemListStart\n${bullets}\n      \\resumeItemListEnd`);
   }
-  return blocks.join('\n\n');
+  return `%%%%%%%%%%%%%%%%%%%%%%%%%%%%  PROJECTS  %%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\\section{Personal Projects}\n\\resumeSubHeadingListStart\n${blocks.join('\n\n')}\n\\resumeSubHeadingListEnd\n`;
 }
 
 function buildCompetencies(items) {
@@ -155,16 +165,26 @@ async function main() {
   const githubUrl = sanitizeUrl(payload.github?.url || '');
   const githubDisplay = payload.github?.display || '';
 
+  const socialParts = [];
+  if (linkedinUrl && linkedinDisplay) socialParts.push(`\\href{${linkedinUrl}}{\\underline{${escapeLatex(linkedinDisplay)}}}`);
+  if (githubUrl && githubDisplay) socialParts.push(`\\href{${githubUrl}}{\\underline{${escapeLatex(githubDisplay)}}}`);
+  const socialLinks = socialParts.length > 0 ? ' ~\n        ' + socialParts.join('  ~\n        ') : '';
+
   const substitutions = {
     NAME: escapeLatex(payload.name || ''),
     CONTACT_LINE: escapeLatex(payload.contact_line || ''),
     EMAIL_URL: emailUrl,
     EMAIL_DISPLAY: escapeLatex(emailDisplay),
+<<<<<<< HEAD
     LINKEDIN_URL: linkedinUrl,
     LINKEDIN_DISPLAY: escapeLatex(linkedinDisplay),
     GITHUB_URL: githubUrl,
     GITHUB_DISPLAY: escapeLatex(githubDisplay),
     SUMMARY_TEXT: escapeLatex(payload.summary_text || ''),
+=======
+    SOCIAL_LINKS: socialLinks,
+    SUMMARY: buildSummary(payload.summary),
+>>>>>>> main
     COMPETENCIES: buildCompetencies(payload.competencies),
     EDUCATION: buildEducation(payload.education),
     EXPERIENCE: buildExperience(payload.experience),
@@ -221,6 +241,8 @@ async function runSelfTest() {
     email: { url: 'test@example.com', display: 'test@example.com' },
     linkedin: { url: 'https://linkedin.com/in/test', display: 'linkedin.com/in/test' },
     github: { url: 'https://github.com/test', display: 'github.com/test' },
+    summary: 'Experienced engineer with a strong background in testing and automation. Skilled in building reliable systems and driving continuous improvement across cross-functional teams.',
+    competencies: ['Automated Testing', 'CI/CD Pipelines', 'Python', 'System Design', 'Cross-functional Collaboration'],
     education: [{
       institution: 'Test University',
       location: 'City, State',
@@ -274,15 +296,19 @@ async function runSelfTest() {
   const githubUrl = sanitizeUrl(sample.github?.url || '');
   const githubDisplay = sample.github?.display || '';
 
+  const socialParts = [];
+  if (linkedinUrl && linkedinDisplay) socialParts.push(`\\href{${linkedinUrl}}{\\underline{${escapeLatex(linkedinDisplay)}}}`);
+  if (githubUrl && githubDisplay) socialParts.push(`\\href{${githubUrl}}{\\underline{${escapeLatex(githubDisplay)}}}`);
+  const socialLinks = socialParts.length > 0 ? ' ~\n        ' + socialParts.join('  ~\n        ') : '';
+
   const substitutions = {
     NAME: escapeLatex(sample.name),
     CONTACT_LINE: escapeLatex(sample.contact_line),
     EMAIL_URL: emailUrl,
     EMAIL_DISPLAY: escapeLatex(emailDisplay),
-    LINKEDIN_URL: linkedinUrl,
-    LINKEDIN_DISPLAY: escapeLatex(linkedinDisplay),
-    GITHUB_URL: githubUrl,
-    GITHUB_DISPLAY: escapeLatex(githubDisplay),
+    SOCIAL_LINKS: socialLinks,
+    SUMMARY: buildSummary(sample.summary),
+    COMPETENCIES: buildCompetencies(sample.competencies),
     EDUCATION: buildEducation(sample.education),
     EXPERIENCE: buildExperience(sample.experience),
     PROJECTS: buildProjects(sample.projects),

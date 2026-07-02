@@ -92,7 +92,7 @@ Write a JSON file with this structure. `build-cv-latex.mjs` handles template mer
 | `education[].location` | string | Institution location |
 | `education[].degree` | string | Degree name |
 | `education[].dates` | string | Date range |
-| `education[].coursework` | string[] | Optional — generates a coursework line if present |
+| `education[].coursework` | string[] | **DO NOT populate.** Coursework is excluded from output — omit this field entirely. |
 | `experience[].company` | string | From cv.md Experience |
 | `experience[].role` | string | Job title |
 | `experience[].location` | string | Work location |
@@ -104,6 +104,11 @@ Write a JSON file with this structure. `build-cv-latex.mjs` handles template mer
 | `projects[].bullets` | string[] | Selected project achievements |
 | `skills[].category` | string | Skill category name (e.g. "Languages", "Frameworks") |
 | `skills[].items` | string | Comma-separated skills in that category |
+
+## Content exclusion rules
+
+- **No relevant coursework.** Never populate `education[].coursework` — omit the field entirely from the JSON payload.
+- **No personal projects from employment.** `projects[]` must only include standalone projects (open source, side projects, portfolio). Projects done as part of a job role go as bullets under `experience[].bullets`, not here.
 
 ## LaTeX Escaping (handled by the script)
 
