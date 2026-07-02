@@ -132,3 +132,4 @@ batch-extract*
 consolidate-archetypes.mjs
 extract-jd*.mjs
 parse*.mjs
+dashboard/career-dashboard.lnk
