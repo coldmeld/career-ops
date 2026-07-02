@@ -128,16 +128,12 @@ async function main() {
     mkdirSync(targetDir, { recursive: true });
   }
 
-<<<<<<< HEAD
   // Ensure tectonic can write its cache when ~/.cache is not writable
   if (!process.env.XDG_CACHE_HOME) {
     process.env.XDG_CACHE_HOME = '/home/node/.local-cache';
   }
 
-  // Detect available engine: prefer tectonic, fall back to pdflatex
-=======
   // Detect available engine: prefer project-local tectonic, then PATH tectonic, then pdflatex
->>>>>>> main
   let engine = null;
   const projectRoot = resolve(dirname(new URL(import.meta.url).pathname));
   const localTectonic = join(projectRoot, 'tectonic');

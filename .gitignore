@@ -123,3 +123,12 @@ tectonic
 texlive/
 tokenless-scripts.md
 urgent.md
+.cache/fontconfig
+draft.md
+*.docx
+.claude/settings.json
+.mcp.json
+batch-extract*
+consolidate-archetypes.mjs
+extract-jd*.mjs
+parse*.mjs

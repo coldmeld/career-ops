@@ -54,11 +54,6 @@ function buildSummary(text) {
   return escapeLatex(text);
 }
 
-function buildCompetencies(items) {
-  if (!Array.isArray(items) || items.length === 0) return '';
-  return items.map(item => `\\textbf{${escapeLatex(item)}}`).join(' $\\cdot$ ');
-}
-
 function buildEducation(entries) {
   if (!Array.isArray(entries) || entries.length === 0) return '';
   const blocks = [];
@@ -99,7 +94,7 @@ function buildProjects(entries) {
 
 function buildCompetencies(items) {
   if (!Array.isArray(items) || items.length === 0) return '';
-  return items.map(c => escapeLatex(c)).join(' $|$ ');
+  return items.map(c => escapeLatex(c)).join(' $\\cdot$ ');
 }
 
 function buildSkills(categories) {
@@ -175,16 +170,8 @@ async function main() {
     CONTACT_LINE: escapeLatex(payload.contact_line || ''),
     EMAIL_URL: emailUrl,
     EMAIL_DISPLAY: escapeLatex(emailDisplay),
-<<<<<<< HEAD
-    LINKEDIN_URL: linkedinUrl,
-    LINKEDIN_DISPLAY: escapeLatex(linkedinDisplay),
-    GITHUB_URL: githubUrl,
-    GITHUB_DISPLAY: escapeLatex(githubDisplay),
-    SUMMARY_TEXT: escapeLatex(payload.summary_text || ''),
-=======
     SOCIAL_LINKS: socialLinks,
-    SUMMARY: buildSummary(payload.summary),
->>>>>>> main
+    SUMMARY_TEXT: escapeLatex(payload.summary_text || ''),
     COMPETENCIES: buildCompetencies(payload.competencies),
     EDUCATION: buildEducation(payload.education),
     EXPERIENCE: buildExperience(payload.experience),
