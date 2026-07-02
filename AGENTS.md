@@ -13,14 +13,17 @@ The portfolio that goes with this system is also open source: [cv-santiago](http
 There are two layers. Read `DATA_CONTRACT.md` for the full list.
 
 **User Layer (NEVER auto-updated, personalization goes HERE):**
-- `cv.md`, `config/profile.yml`, `modes/_profile.md`, `article-digest.md`, `portals.yml`
+- `cv.md`, `config/profile.yml`, `modes/_profile.md`, `modes/_custom.md`, `article-digest.md`, `portals.yml`
 - `data/*`, `reports/*`, `output/*`, `interview-prep/*`
 
 **System Layer (auto-updatable, DON'T put user data here):**
 - `modes/_shared.md`, `modes/oferta.md`, all other modes
 - `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `OPENCODE.md`, `*.mjs` scripts, `dashboard/*`, `templates/*`, `batch/*`
 
-**THE RULE: When the user asks to customize anything (archetypes, narrative, negotiation scripts, proof points, location policy, comp targets), ALWAYS write to `modes/_profile.md` or `config/profile.yml`. NEVER edit `modes/_shared.md` for user-specific content.** This ensures system updates don't overwrite their customizations.
+**THE RULE: When the user asks to customize anything, write to the USER layer, NEVER to a system file — that is what survives `node update-system.mjs`.**
+- **Profile / evaluation content** (archetypes, narrative, negotiation scripts, proof points, location policy, comp targets) → `modes/_profile.md` or `config/profile.yml`.
+- **Procedural rules** (house rules, custom workflows, output preferences, "always/never do X" automations) → `modes/_custom.md` (create it from `modes/_custom.template.md` if missing).
+- **NEVER** edit `modes/_shared.md`, `CLAUDE.md`, or any other system file for user-specific content — those get overwritten on update.
 
 ## Source-of-Truth Boundary (CRITICAL)
 
@@ -112,7 +115,17 @@ AI-powered, CLI-agnostic job search automation: pipeline tracking, offer evaluat
 | `scan.mjs` | Zero-token portal scanner — hits Greenhouse/Ashby/Lever APIs directly, zero LLM cost |
 | `check-liveness.mjs` | Job posting liveness checker |
 | `liveness-core.mjs` | Shared liveness logic (expired signals win over generic Apply text) |
-| `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`). Blocks A-F + G (Posting Legitimacy). Header includes `**Legitimacy:** {tier}`. |
+| `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`). Blocks A-F + G (Posting Legitimacy), plus `## Machine Summary` YAML for downstream scripts. Header includes `**Legitimacy:** {tier}`. |
+
+### OpenCode, Antigravity CLI & Grok Build CLI Commands
+
+[OpenCode](https://opencode.ai), Antigravity CLI, and Grok Build CLI natively support the open agent skill standard (`agentskills.io`). All subcommands are routed through the single unified skill defined in `.agents/skills/career-ops/SKILL.md`.
+
+* `/career-ops` — Shows the Command Center menu
+* `/career-ops {JD text or URL}` — Runs the auto-evaluation pipeline
+* `/career-ops [subcommand]` — Runs a specific subcommand
+
+All `modes/*` files and prompt contexts are shared across Claude Code, OpenCode, Antigravity CLI, and Grok Build CLI. `GEMINI.md` remains only as a legacy no-op guard so Antigravity does not duplicate the full project instructions.
 
 ### Plugins (optional)
 
@@ -268,6 +281,7 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 | Wants LinkedIn outreach | `contacto` |
 | Asks for company research | `deep` |
 | Preps for interview at specific company | `interview-prep` |
+| Wants interactive profile/CV onboarding | `interview` |
 | Wants a time-blocked prep plan for an upcoming interview | `interview/plan` |
 | Wants to run practice interview questions with feedback | `interview/practice` |
 | Wants to debrief after a real interview and close gaps | `interview/debrief` |
@@ -304,12 +318,14 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 
 ## Offer Verification -- MANDATORY
 
-**NEVER trust WebSearch/WebFetch to verify if an offer is still active.** ALWAYS use Playwright:
-1. `browser_navigate` to the URL
-2. `browser_snapshot` to read content
-3. Only footer/navbar without JD = closed. Title + description + Apply = active.
+Verify a posting is still live before applying — using the cheapest check that works (a false "expired" is worse than a slow check: it makes the user miss a real job):
 
-**Exception for batch workers (headless mode):** Playwright is not available in headless pipe mode. Use WebFetch as fallback and mark the report header with `**Verification:** unconfirmed (batch mode)`. The user can verify manually later.
+1. **ATS-hosted postings (Greenhouse, Lever, ...) — API first, zero tokens:** run `node check-liveness.mjs <url>`. It hits the posting's public ATS JSON API directly (no browser, no tokens) and reports `active`/`expired`, falling back to a browser only when the API is inconclusive. A definitive `expired` from the API is authoritative.
+2. **Non-ATS pages, or when the API is inconclusive — Playwright:** `browser_navigate` to the URL + `browser_snapshot`. Only footer/navbar without JD = closed; title + description + Apply = active.
+
+**NEVER decide liveness from a bare WebSearch/WebFetch snippet** — use `check-liveness.mjs` (which does the API rung) or Playwright.
+
+**Exception for batch workers (headless mode):** Playwright is unavailable in headless pipe mode. The API rung above still works for ATS postings; for non-ATS pages use WebFetch as a fallback and mark the report header `**Verification:** unconfirmed (batch mode)`.
 
 ---
 
