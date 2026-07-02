@@ -43,6 +43,18 @@ const EXPIRED_URL_PATTERNS = [
   /[?&]error=true/i,
 ];
 
+// Portals that block headless Playwright by redirecting to a search/login page
+// rather than serving a bot challenge or 403. The redirect body often matches
+// LISTING_PAGE_PATTERNS ("500+ jobs found") or lacks an apply control, producing
+// false `expired` verdicts for postings that are still live. Always return
+// `uncertain` for these hostnames so agents verify manually during evaluation.
+const PORTAL_BYPASS_HOSTNAMES = [
+  /\.indeed\.com$/i,
+  /^indeed\.com$/i,
+  /\.mycareersfuture\.gov\.sg$/i,
+  /^mycareersfuture\.gov\.sg$/i,
+];
+
 const APPLY_PATTERNS = [
   /\bapply\b/i,
   /\bsolicitar\b/i,
@@ -71,6 +83,16 @@ function hasApplyControl(controls = []) {
 }
 
 export function classifyLiveness({ status = 0, finalUrl = '', bodyText = '', applyControls = [] } = {}) {
+  // Portals that silently redirect bots to search/login pages produce false
+  // `expired` results (the redirect body matches listing-page or lack-of-apply
+  // heuristics). Return `uncertain` so agents verify manually.
+  try {
+    const host = new URL(finalUrl).hostname.toLowerCase();
+    if (PORTAL_BYPASS_HOSTNAMES.some((p) => p.test(host))) {
+      return { result: 'uncertain', code: 'portal_bypass', reason: `${host} redirects bots — manual verification required` };
+    }
+  } catch { /* invalid URL — fall through to normal checks */ }
+
   if (status === 404 || status === 410) {
     return { result: 'expired', code: 'http_gone', reason: `HTTP ${status}` };
   }

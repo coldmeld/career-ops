@@ -63,6 +63,26 @@ Aplicación durante la evaluación A-G:
 2. Si el archivo está vacío o no existe, intenta obtener el JD desde `{{URL}}` con WebFetch
 3. Si ambos fallan, reporta error y termina
 
+### Paso 1.5 — Pre-check: Experiencia requerida ausente
+
+**Antes de evaluar**, revisar si el JD exige experiencia en un campo o dominio que el candidato no posee.
+
+**REGLA: Si el JD REQUIERE experiencia en un campo que el candidato no tiene → SKIP inmediato. No generar report completo ni PDF.**
+
+Excepción: Si el JD indica explícitamente apertura a candidatos sin esa experiencia (ej. "no prior experience required", "training provided", "fresh graduates welcome", "entry-level", "career changers welcome") → continuar evaluación normal y anotar el gap.
+
+| Señal en el JD | Acción |
+|----------------|--------|
+| "must have X years of [domain] experience" y candidato no tiene ese domain | SKIP — nota: "Requires [domain] experience — not in profile" |
+| "[domain] experience required" sin alternativa | SKIP |
+| "[domain] experience preferred / advantageous" (no mandatory) | Continuar — anotar gap |
+| JD ambiguo (mandatory o preferred no claro) | Continuar — marcar incertidumbre en report |
+| JD dice "no experience required" / "training provided" | Continuar — ignorar el gap |
+
+Si SKIP: escribir tracker TSV con status `Descartado`, score `N/A`, nota "Required [domain] experience not in profile", y emitir output JSON con `"score": null`. No continuar con Paso 2–4.
+
+---
+
 ### Paso 2 — Evaluación A-G
 
 Read `cv.md`. Ejecuta TODOS los bloques:
@@ -442,6 +462,7 @@ Si algo falla:
 
 ### NUNCA
 1. Inventar experiencia o métricas
+0. Evaluar un rol que requiere experiencia en un dominio que el candidato no posee — SKIP inmediato (salvo que el JD indique apertura explícita a candidatos sin esa experiencia)
 2. Modificar cv.md, i18n.ts ni archivos del portfolio
 3. Compartir el teléfono en mensajes generados
 4. Recomendar comp por debajo de mercado
