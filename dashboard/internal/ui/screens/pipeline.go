@@ -99,6 +99,7 @@ const (
 	filterAll       = "all"
 	filterEvaluated = "evaluated"
 	filterApplied   = "applied"
+	filterResponded   = "responded"
 	filterInterview = "interview"
 	filterSkip      = "skip"
 	filterRejected  = "rejected"
@@ -115,6 +116,7 @@ var pipelineTabs = []pipelineTab{
 	{filterAll, "ALL"},
 	{filterEvaluated, "EVALUATED"},
 	{filterApplied, "APPLIED"},
+	{filterResponded, "Responded"},
 	{filterInterview, "INTERVIEW"},
 	{filterTop, "TOP ≥4"},
 	{filterSkip, "SKIP"},
@@ -1192,7 +1194,7 @@ func (m PipelineModel) workModeColor(mode string) lipgloss.Color {
 	}
 }
 
-func (m PipelineModel) renderLocCell(app model.CareerApplication, width int) string {
+func (m PipelineModel) renderLocCell(app model.CareerApplication, width int, bg, fgOverride lipgloss.Color) string {
 	text := app.WorkMode
 	if app.Location != "" {
 		if text != "" {
@@ -1204,27 +1206,37 @@ func (m PipelineModel) renderLocCell(app model.CareerApplication, width int) str
 	if text == "" {
 		text = "—"
 	}
-	return lipgloss.NewStyle().Foreground(m.workModeColor(app.WorkMode)).Width(width).Render(truncateRunes(text, width))
+	color := m.workModeColor(app.WorkMode)
+	if fgOverride != "" {
+		color = fgOverride
+	}
+	return lipgloss.NewStyle().Foreground(color).Background(bg).Width(width).Render(truncateRunes(text, width))
 }
 
-func (m PipelineModel) renderCheckCell(yes bool, width int) string {
+func (m PipelineModel) renderCheckCell(yes bool, width int, bg, fgOverride lipgloss.Color) string {
 	text := "—"
 	color := m.theme.Subtext
 	if yes {
 		text = "✓"
 		color = m.theme.Green
 	}
-	return lipgloss.NewStyle().Foreground(color).Width(width).Render(text)
+	if fgOverride != "" {
+		color = fgOverride
+	}
+	return lipgloss.NewStyle().Foreground(color).Background(bg).Width(width).Render(text)
 }
 
 // renderPayCell prefers the pay range parsed from notes and falls back to the
 // report-cache comp estimate (the pre-column behavior). POSTED bands render
 // green; estimates stay yellow.
-func (m PipelineModel) renderPayCell(app model.CareerApplication, width int) string {
+func (m PipelineModel) renderPayCell(app model.CareerApplication, width int, bg, fgOverride lipgloss.Color) string {
 	text := app.PayRange
 	color := m.theme.Yellow
 	if app.PaySource == "POSTED" {
 		color = m.theme.Green
+	}
+	if fgOverride != "" {
+		color = fgOverride
 	}
 	if text == "" {
 		if summary, ok := m.reportCache[app.ReportPath]; ok && summary.comp != "" {
@@ -1232,9 +1244,9 @@ func (m PipelineModel) renderPayCell(app model.CareerApplication, width int) str
 		}
 	}
 	if text == "" {
-		return lipgloss.NewStyle().Width(width).Render("")
+		return lipgloss.NewStyle().Background(bg).Width(width).Render("")
 	}
-	return lipgloss.NewStyle().Foreground(color).Width(width).Render(truncateRunes(text, width-1))
+	return lipgloss.NewStyle().Foreground(color).Background(bg).Width(width).Render(truncateRunes(text, width-1))
 }
 
 // renderColumnHeader labels the table columns; widths mirror renderAppLine.
@@ -1279,36 +1291,52 @@ func (m PipelineModel) renderAppLine(app model.CareerApplication, selected bool)
 	padStyle := lipgloss.NewStyle().Padding(0, 2)
 	cw := m.columnWidths()
 
+	var bg, fg lipgloss.Color
+	if selected {
+		bg = m.theme.Text
+		fg = m.theme.Base
+	}
+
+	cellFg := func(normal lipgloss.Color) lipgloss.Color {
+		if selected {
+			return fg
+		}
+		return normal
+	}
+
 	// Tracker number (fixed width)
 	numText := "#—"
 	if app.Number > 0 {
 		numText = fmt.Sprintf("#%d", app.Number)
 	}
-	numStyle := lipgloss.NewStyle().Foreground(m.theme.Blue).Bold(true).Width(cw.num)
+	numStyle := lipgloss.NewStyle().Foreground(cellFg(m.theme.Blue)).Background(bg).Bold(true).Width(cw.num)
 
 	// Score with color
-	scoreStyle := m.scoreStyle(app.Score)
+	scoreStyle := m.scoreStyle(app.Score).Background(bg)
+	if selected {
+		scoreStyle = scoreStyle.Foreground(fg)
+	}
 	score := scoreStyle.Render(fmt.Sprintf("%.1f", app.Score))
 
 	// Company (truncate)
 	company := truncateRunes(app.Company, cw.company)
-	companyStyle := lipgloss.NewStyle().Foreground(m.theme.Text).Width(cw.company)
+	companyStyle := lipgloss.NewStyle().Foreground(cellFg(m.theme.Text)).Background(bg).Width(cw.company)
 
 	// Date (fixed width)
 	dateText := app.Date
 	if dateText == "" {
 		dateText = "—"
 	}
-	dateStyle := lipgloss.NewStyle().Foreground(m.theme.Subtext).Width(cw.date)
+	dateStyle := lipgloss.NewStyle().Foreground(cellFg(m.theme.Subtext)).Background(bg).Width(cw.date)
 
 	// Role (truncate)
 	role := truncateRunes(app.Role, cw.role)
-	roleStyle := lipgloss.NewStyle().Foreground(m.theme.Subtext).Width(cw.role)
+	roleStyle := lipgloss.NewStyle().Foreground(cellFg(m.theme.Subtext)).Background(bg).Width(cw.role)
 
 	// Status with color -- fixed column
 	norm := data.NormalizeStatus(app.Status)
 	statusColor := m.statusColorMap()[norm]
-	statusStyle := lipgloss.NewStyle().Foreground(statusColor).Width(cw.status)
+	statusStyle := lipgloss.NewStyle().Foreground(cellFg(statusColor)).Background(bg).Width(cw.status)
 	statusText := statusStyle.Render(statusLabel(norm))
 
 	segments := []string{
@@ -1323,34 +1351,38 @@ func (m PipelineModel) renderAppLine(app model.CareerApplication, selected bool)
 	segments = append(segments, statusText)
 
 	if cw.loc > 0 {
-		segments = append(segments, m.renderLocCell(app, cw.loc))
+		segments = append(segments, m.renderLocCell(app, cw.loc, bg, fg))
 	}
 	if cw.pay > 0 {
-		segments = append(segments, m.renderPayCell(app, cw.pay))
+		segments = append(segments, m.renderPayCell(app, cw.pay, bg, fg))
 	}
 	if cw.rpt > 0 {
-		segments = append(segments, m.renderCheckCell(app.ReportPath != "", cw.rpt))
+		segments = append(segments, m.renderCheckCell(app.ReportPath != "", cw.rpt, bg, fg))
 	}
 	if cw.pdf > 0 {
-		segments = append(segments, m.renderCheckCell(app.HasPDF, cw.pdf))
+		segments = append(segments, m.renderCheckCell(app.HasPDF, cw.pdf, bg, fg))
 	}
 	if cw.last > 0 {
 		lastText := "—"
 		if app.LastContact != "" {
 			lastText = formatTimeAgo(app.LastContact)
 		}
-		lastStyle := lipgloss.NewStyle().Foreground(m.theme.Subtext).Width(cw.last)
+		lastStyle := lipgloss.NewStyle().Foreground(cellFg(m.theme.Subtext)).Background(bg).Width(cw.last)
 		if app.LastContact != "" && app.LastContact != app.Date {
-			lastStyle = lastStyle.Foreground(m.theme.Text)
+			lastStyle = lastStyle.Foreground(cellFg(m.theme.Text))
 		}
 		segments = append(segments, lastStyle.Render(truncateRunes(lastText, cw.last)))
 	}
 
-	line := " " + strings.Join(segments, " ")
+	spacer := " "
+	if selected {
+		spacer = lipgloss.NewStyle().Background(bg).Render(" ")
+	}
+	line := spacer + strings.Join(segments, spacer)
 
 	if selected {
 		selStyle := lipgloss.NewStyle().
-			Background(m.theme.Overlay).
+			Background(m.theme.Text).
 			Width(m.width - 4)
 		return padStyle.Render(selStyle.Render(line))
 	}

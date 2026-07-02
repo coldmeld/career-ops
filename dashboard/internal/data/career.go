@@ -72,7 +72,7 @@ func ParseApplications(careerOpsPath string) []model.CareerApplication {
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "# ") || strings.HasPrefix(line, "|---") || strings.HasPrefix(line, "| #") {
+		if line == "" || strings.HasPrefix(line, "# ") || strings.HasPrefix(line, "|-") || strings.HasPrefix(line, "| #") || strings.HasPrefix(line, "|#") {
 			continue
 		}
 		if !strings.HasPrefix(line, "|") {

@@ -124,7 +124,7 @@ function gc() {
 const [,, cmd, arg] = process.argv;
 
 if (cmd === '--release') {
-  if (!arg || !/^\d{1,3}$/.test(arg)) {
+  if (!arg || !/^\d+$/.test(arg)) {
     process.stderr.write('Usage: node reserve-report-num.mjs --release <NNN>\n');
     process.exit(1);
   }
