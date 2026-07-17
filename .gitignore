@@ -154,3 +154,7 @@ extract-jd*.mjs
 parse*.mjs
 dashboard/career-dashboard.lnk
 batch*.mjs
+batch*.json
+batch/email-threads/
+*.tar.gz
+extract-mcf*.mjs

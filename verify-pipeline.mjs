@@ -13,11 +13,8 @@
  * 8. Stale report-number reservation sentinels are garbage-collected
  * 9. No two report files cover the same company+role (warning — see #1425)
  * 10. Every report file has a tracker row referencing it (warning — see #1425)
-<<<<<<< HEAD
-=======
  * 11. Via channel consistency (see #1596)
  * 12. No # value reused across 2+ tracker rows (error — see #1704)
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
  *
  * Run: node career-ops/verify-pipeline.mjs
  */
@@ -339,8 +336,6 @@ for (const name of reportFiles) {
 }
 if (orphanReports === 0) ok('No orphan reports');
 
-<<<<<<< HEAD
-=======
 // --- Check 11: Via channel consistency (#1596) ---
 // The Via column records the intermediary (agency/recruiter firm; `—` when the
 // application was direct). Unknown employers use the structural marker `?` in
@@ -414,7 +409,6 @@ for (const [num, group] of numGroups) {
 }
 if (dupeNums === 0) ok('No duplicate tracker numbers');
 
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 // --- Summary ---
 console.log('\n' + '='.repeat(50));
 console.log(`📊 Pipeline Health: ${errors} errors, ${warnings} warnings`);
