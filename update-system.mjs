@@ -33,9 +33,9 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
 
-const CANONICAL_REPO = 'https://github.com/santifer/career-ops.git';
-const RAW_VERSION_URL = 'https://raw.githubusercontent.com/santifer/career-ops/main/VERSION';
-const RELEASES_API = 'https://api.github.com/repos/santifer/career-ops/releases/latest';
+const CANONICAL_REPO = 'https://github.com/coldmeld/career-ops.git';
+const RAW_VERSION_URL = 'https://raw.githubusercontent.com/coldmeld/career-ops/main/VERSION';
+const RELEASES_API = 'https://api.github.com/repos/coldmeld/career-ops/releases/latest';
 
 // Matches a semver, with or without a leading `v` and an optional
 // Release Please component prefix (e.g. `career-ops-v1.9.0` → `1.9.0`).
@@ -102,11 +102,8 @@ const SYSTEM_PATHS = [
   'modes/fr/interview/',
   'modes/hi/',
   'modes/es/',
-<<<<<<< HEAD
-=======
   'modes/es/interview/',
   'modes/id/',
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   'modes/it/',
   'modes/ja/',
   'modes/ko/',
@@ -159,17 +156,11 @@ const SYSTEM_PATHS = [
   'classify-tier.mjs',
   'scan-ats-full.mjs',
   'match-star.mjs',
-<<<<<<< HEAD
-  'prepare-application.mjs',
-  'providers/',
-  'seeds/',
-=======
   'jd-skill-gap.mjs',
   'prepare-application.mjs',
   'providers/',
   'seeds/',
   'tests/',
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   'doctor.mjs',
   'check-liveness.mjs',
   'liveness-core.mjs',
@@ -188,14 +179,11 @@ const SYSTEM_PATHS = [
   'assessment-log.mjs',
   'followup-cadence.mjs',
   'followup-cadence.test.mjs',
-<<<<<<< HEAD
-=======
   'invite-match.mjs',
   'invite-match.test.mjs',
   'agent-inbox.mjs',
   'followup-seed.mjs',
   'followup-seed-tests.mjs',
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   'gemini-eval.mjs',
   'ollama-eval.mjs',
   'openai-eval.mjs',
@@ -956,15 +944,11 @@ async function apply() {
     // Skip if the current binary already launches — avoids redundant installs
     // that trigger unnecessary permission prompts on every update.
     try {
-<<<<<<< HEAD
       const pwCheck = execSync(
         'node -e "import(\'playwright\').then(({chromium})=>chromium.launch({headless:true})).then(b=>b.close()).then(()=>process.exit(0)).catch(()=>process.exit(1))"',
         { cwd: ROOT, timeout: 15000, stdio: 'ignore' }
       );
       // exit 0 = already working, skip install
-=======
-      execSync('npx playwright install chromium', { cwd: ROOT, timeout: PLAYWRIGHT_INSTALL_TIMEOUT_MS, stdio: 'ignore' });
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     } catch {
       // non-zero exit = not working, install
       try {

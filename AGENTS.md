@@ -20,7 +20,10 @@ There are two layers. Read `DATA_CONTRACT.md` for the full list.
 - `modes/_shared.md`, `modes/oferta.md`, all other modes
 - `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `OPENCODE.md`, `*.mjs` scripts, `dashboard/*`, `templates/*`, `batch/*`
 
-**THE RULE: When the user asks to customize facts or targeting (archetypes, narrative, negotiation scripts, proof points, location policy, comp targets), ALWAYS write to `modes/_profile.md` or `config/profile.yml`. When they ask for procedural house rules, custom workflows, output preferences, or automations, write to `modes/_custom.md` (copy it from `modes/_custom.template.md` if missing). NEVER edit `modes/_shared.md` for user-specific content.** This ensures system updates don't overwrite their customizations.
+**THE RULE: When the user asks to customize anything, write to the USER layer, NEVER to a system file — that is what survives `node update-system.mjs`.**
+- **Profile / evaluation content** (archetypes, narrative, negotiation scripts, proof points, location policy, comp targets) → `modes/_profile.md` or `config/profile.yml`.
+- **Procedural rules** (house rules, custom workflows, output preferences, "always/never do X" automations) → `modes/_custom.md` (create it from `modes/_custom.template.md` if missing).
+- **NEVER** edit `modes/_shared.md`, `CLAUDE.md`, or any other system file for user-specific content — those get overwritten on update.
 
 ## Source-of-Truth Boundary (CRITICAL)
 
@@ -107,12 +110,9 @@ AI-powered, CLI-agnostic job search automation: pipeline tracking, offer evaluat
 | `interview-prep/story-bank.md` | Accumulated STAR+R stories across evaluations |
 | `interview-prep/{company}-{role}.md` | Company-specific interview intel reports |
 | `analyze-patterns.mjs` | Pattern analysis script (JSON output). Includes ATS channel analysis (per-vendor advance rate; motivated by Bommasani et al., Algorithmic Monocultures in Hiring, FAccT 2026). |
-<<<<<<< HEAD
-=======
 | `upskill.mjs` | Aggregate skill-gap analyzer — weighted gap map from tracked reports, known skills from `cv.md`/`config/profile.yml` excluded (JSON output) |
 | `stats.mjs` | Lifetime pipeline stats aggregator (JSON or `--summary`) — tracker roll-up, canonical `ever*` funnel, lifetime scan totals, portal coverage, follow-up compliance, scan-run trends |
 | `data/scan-runs.tsv` | Per-run scan counters (appended by `scan.mjs`, read by `stats.mjs`) |
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 | `followup-cadence.mjs` | Follow-up cadence calculator (JSON output) |
 | `followup-seed.mjs` | Seeds `data/follow-ups.md` with a pinned first follow-up date when a row turns Applied (JSON output) |
 | `set-status.mjs` | Canonical CLI to update a tracker row: `node set-status.mjs <report#\|company> <State> [--note] [--force]` — strict states.yml validation, report-link mismatch guard, shared tracker lock, atomic write |
@@ -131,7 +131,17 @@ AI-powered, CLI-agnostic job search automation: pipeline tracking, offer evaluat
 | `scan-ats-full.mjs` | Reverse-ATS keyword-first scanner — walks the full public job-board-aggregator dataset per ATS provider (Greenhouse/Lever/Ashby/Workday), filtered by portals.yml's title_filter/location_filter. No company-list curation needed; complements scan.mjs's company-first model. |
 | `check-liveness.mjs` | Job posting liveness checker |
 | `liveness-core.mjs` | Shared liveness logic (expired signals win over generic Apply text) |
-| `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`). Blocks A-F + G (Posting Legitimacy). Header includes `**Legitimacy:** {tier}`. |
+| `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`). Blocks A-F + G (Posting Legitimacy), plus `## Machine Summary` YAML for downstream scripts. Header includes `**Legitimacy:** {tier}`. |
+
+### OpenCode, Antigravity CLI & Grok Build CLI Commands
+
+[OpenCode](https://opencode.ai), Antigravity CLI, and Grok Build CLI natively support the open agent skill standard (`agentskills.io`). All subcommands are routed through the single unified skill defined in `.agents/skills/career-ops/SKILL.md`.
+
+* `/career-ops` — Shows the Command Center menu
+* `/career-ops {JD text or URL}` — Runs the auto-evaluation pipeline
+* `/career-ops [subcommand]` — Runs a specific subcommand
+
+All `modes/*` files and prompt contexts are shared across Claude Code, OpenCode, Antigravity CLI, and Grok Build CLI. `GEMINI.md` remains only as a legacy no-op guard so Antigravity does not duplicate the full project instructions.
 
 ### Plugins (optional)
 
@@ -145,11 +155,7 @@ Some users enable plugins (external integrations). If an enabled plugin ships a 
 node doctor.mjs --json
 ```
 
-<<<<<<< HEAD
-Output: `{"onboardingNeeded": <bool>, "missing": [...], "warnings": [...], "autoCopied": [...]}`, where `missing` lists whichever of `cv.md`, `config/profile.yml`, `modes/_profile.md`, `portals.yml` are absent. `warnings` is reserved for non-blocking setup signals, and `autoCopied` lists user customization files (`modes/_profile.md` or `modes/_custom.md`) that `doctor.mjs` automatically copied from their `.template.md` equivalents during the check.
-=======
 Output: `{"onboardingNeeded": <bool>, "missing": [...], "warnings": [...], "autoCopied": [...]}`, where `missing` lists whichever of `cv.md`, `config/profile.yml`, `modes/_profile.md`, `portals.yml` are absent. `warnings` is reserved for non-blocking setup signals, and `autoCopied` lists user customization files (`modes/_profile.md` or `modes/_custom.md`) that `doctor.mjs` automatically copied from their template equivalents (`modes/_profile.template.md` or `modes/_custom.template.md`) during the check.
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
 - **If `onboardingNeeded` is true (any of `cv.md` / `config/profile.yml` / `modes/_profile.md` / `portals.yml` is missing), enter onboarding mode.** Do NOT proceed with evaluations, scans, or any other mode until the basics are in place. Guide the user step by step:
 
@@ -323,13 +329,11 @@ These are two separate axes:
 | Wants a formal application email | `email` — draft-only subject, body, attachment checklist, and contact block from a report or JD; never sends, submits, or clicks anything |
 | Asks for company research | `deep` — generates a structured 6-axis research prompt covering AI strategy, recent moves, engineering culture, likely challenges, competitors, and the candidate's angle given their profile |
 | Preps for interview at specific company | `interview-prep` |
+| Wants interactive profile/CV onboarding | `interview` |
 | Wants a time-blocked prep plan for an upcoming interview | `interview/plan` |
 | Wants to run practice interview questions with feedback | `interview/practice` |
 | Wants to debrief after a real interview and close gaps | `interview/debrief` |
-<<<<<<< HEAD
-=======
 | Wants to check if a company is safe to join (red-flag analysis) | `interview-redflag` |
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 | Wants to generate CV/PDF | `pdf` |
 | Evaluates a course/cert | `training` |
 | Evaluates portfolio project | `project` |
@@ -346,7 +350,9 @@ These are two separate axes:
 | Asks about follow-ups or application cadence | `followup` |
 | Wants to classify application replies and review updates | `reply-watch` — classifies candidate replies, matches them to applications, and suggests tracker updates |
 | Wants to update the system | `update` |
-| Wants to queue a request for later / check the inbox between sessions | `agent-inbox` — append-only checklist the agent drains at the start of the next session; nothing auto-submits |
+| Wants to run a maintenance script or pipeline tool | `scripts` |
+| Wants to feed pipeline into batch and run it | `pipeBatch` |
+| Wants to pull unread job alert emails and add to pipeline | `email-scan` |
 
 ### CV Source of Truth
 
@@ -369,12 +375,14 @@ These are two separate axes:
 
 ## Offer Verification -- MANDATORY
 
-**NEVER trust WebSearch/WebFetch to verify if an offer is still active.** ALWAYS use Playwright:
-1. `browser_navigate` to the URL
-2. `browser_snapshot` to read content
-3. Only footer/navbar without JD = closed. Title + description + Apply = active.
+Verify a posting is still live before applying — using the cheapest check that works (a false "expired" is worse than a slow check: it makes the user miss a real job):
 
-**Exception for batch workers (headless mode):** Playwright is not available in headless pipe mode. Use WebFetch as fallback and mark the report header with `**Verification:** unconfirmed (batch mode)`. The user can verify manually later.
+1. **ATS-hosted postings (Greenhouse, Lever, ...) — API first, zero tokens:** run `node check-liveness.mjs <url>`. It hits the posting's public ATS JSON API directly (no browser, no tokens) and reports `active`/`expired`, falling back to a browser only when the API is inconclusive. A definitive `expired` from the API is authoritative.
+2. **Non-ATS pages, or when the API is inconclusive — Playwright:** `browser_navigate` to the URL + `browser_snapshot`. Only footer/navbar without JD = closed; title + description + Apply = active.
+
+**NEVER decide liveness from a bare WebSearch/WebFetch snippet** — use `check-liveness.mjs` (which does the API rung) or Playwright.
+
+**Exception for batch workers (headless mode):** Playwright is unavailable in headless pipe mode. The API rung above still works for ATS postings; for non-ATS pages use WebFetch as a fallback and mark the report header `**Verification:** unconfirmed (batch mode)`.
 
 ---
 

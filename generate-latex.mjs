@@ -19,22 +19,19 @@ import { execFileSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { fileURLToPath, pathToFileURL } from 'url';
 
-<<<<<<< HEAD
 const REQUIRED_SECTIONS = [
   '\\\\section{Education}',
   '\\\\section{Work Experience}',
   '\\\\section{Technical Skills}',
 ];
-=======
 const MIN_SECTIONS = 4;
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
 
 const REQUIRED_COMMANDS = [
   '\\\\resumeSubheading',
   '\\\\resumeItem',
 ];
 
-<<<<<<< HEAD
 async function main() {
   const inputPath = process.argv[2];
   const outputPath = process.argv[3]; // optional
@@ -61,13 +58,12 @@ const CJK_RE = /[぀-ヿ㐀-鿿豈-﫿ｦ-ﾟ가-힯ᄀ-ᇿ]/;
  * @returns {{ issues: string[], counts: object }}
  */
 export function validateLatexContent(content, compileOnly) {
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
   const issues = [];
   let resumeItemCount = 0;
   let subheadingCount = 0;
   let projectHeadingCount = 0;
 
-<<<<<<< HEAD
   // Check required sections
   for (const pattern of REQUIRED_SECTIONS) {
     if (!new RegExp(pattern).test(content)) {
@@ -83,8 +79,6 @@ export function validateLatexContent(content, compileOnly) {
   }
 
   // Check document structure
-=======
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   if (!content.includes('\\begin{document}')) {
     issues.push('Missing \\begin{document}');
   }
@@ -176,19 +170,15 @@ export async function compileLatexFile(absPath, content, outputPath, compileOnly
     mkdirSync(targetDir, { recursive: true });
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   // Ensure tectonic can write its cache when ~/.cache is not writable
   if (!process.env.XDG_CACHE_HOME) {
     process.env.XDG_CACHE_HOME = '/home/node/.local-cache';
   }
 
-  // Detect available engine: prefer tectonic, fall back to pdflatex
-=======
+
+
   // Detect available engine: prefer project-local tectonic, then PATH tectonic, then pdflatex
->>>>>>> main
-=======
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
   let engine = null;
   const projectRoot = resolve(dirname(new URL(import.meta.url).pathname));
   const localTectonic = join(projectRoot, 'tectonic');
@@ -228,12 +218,7 @@ export async function compileLatexFile(absPath, content, outputPath, compileOnly
   const tectonicEnv = { ...process.env, XDG_CACHE_HOME: join(projectRoot, '.cache') };
   try {
     if (engine === 'tectonic') {
-<<<<<<< HEAD
-      // Tectonic handles multi-pass automatically; --outdir sets output location
-      execFileSync(engineBin, ['--outdir', texDir, compilePath], {
-=======
       execFileSync('tectonic', ['--outdir', texDir, compilePath], {
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
         cwd: texDir,
         stdio: 'pipe',
         timeout: 120_000,
@@ -247,15 +232,9 @@ export async function compileLatexFile(absPath, content, outputPath, compileOnly
         `-output-directory=${texDir}`,
         absPath,
       ];
-<<<<<<< HEAD
-      // First pass
-      execFileSync(engineBin, pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
-      // Second pass (resolves references)
-      execFileSync(engineBin, pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
-=======
       execFileSync('pdflatex', pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
       execFileSync('pdflatex', pdflatexArgs, { cwd: texDir, stdio: 'pipe', timeout: 120_000 });
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
     }
 
     report.compiled = true;

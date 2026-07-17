@@ -12,7 +12,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_PATH = resolve(__dirname, 'templates', 'cv-template.tex');
 const PLACEHOLDER_RE = /\{\{[A-Z_]+\}\}/g;
 
-<<<<<<< HEAD
 function escapeLatex(text, mode = 'text') {
   if (typeof text !== 'string') return '';
   if (mode === 'url') return text;
@@ -63,8 +62,7 @@ function buildCompetencies(items) {
   return items.map(item => `\\textbf{${escapeLatex(item)}}`).join(' $\\cdot$ ');
 }
 
-=======
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
 function buildEducation(entries) {
   if (!Array.isArray(entries) || entries.length === 0) return '';
   const blocks = [];
@@ -199,16 +197,10 @@ async function main() {
     CONTACT_LINE: escapeLatex(payload.contact_line || ''),
     EMAIL_URL: emailUrl,
     EMAIL_DISPLAY: escapeLatex(emailDisplay),
-<<<<<<< HEAD
-    LINKEDIN_URL: linkedinUrl,
-    LINKEDIN_DISPLAY: escapeLatex(linkedinDisplay),
-    GITHUB_URL: githubUrl,
-    GITHUB_DISPLAY: escapeLatex(githubDisplay),
-    SUMMARY_TEXT: escapeLatex(payload.summary_text || ''),
-=======
     SOCIAL_LINKS: socialLinks,
     SUMMARY: buildSummary(payload.summary),
->>>>>>> main
+    SOCIAL_LINKS: socialLinks,
+    SUMMARY_TEXT: escapeLatex(payload.summary_text || ''),
     COMPETENCIES: buildCompetencies(payload.competencies),
     EDUCATION: buildEducation(payload.education),
     EXPERIENCE: buildExperience(payload.experience),
@@ -265,7 +257,7 @@ async function runSelfTest() {
     email: { url: 'test@example.com', display: 'test@example.com' },
     linkedin: { url: 'https://linkedin.com/in/test', display: 'linkedin.com/in/test' },
     github: { url: 'https://github.com/test', display: 'github.com/test' },
-    summary: 'Experienced engineer with a strong background in testing and automation. Skilled in building reliable systems and driving continuous improvement across cross-functional teams.',
+    summary_text: 'Experienced engineer with a strong background in testing and automation. Skilled in building reliable systems and driving continuous improvement across cross-functional teams.',
     competencies: ['Automated Testing', 'CI/CD Pipelines', 'Python', 'System Design', 'Cross-functional Collaboration'],
     education: [{
       institution: 'Test University',

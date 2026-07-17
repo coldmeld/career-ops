@@ -118,22 +118,10 @@ function pageIsPastWindow(pageJobs, sinceMs) {
 }
 
 function resolveEndpoint(entry) {
-<<<<<<< HEAD
   // Primary: extract tenant/instance/site from a *.myworkdayjobs.com careers_url
   const url = entry.careers_url || '';
   const m = url.match(/^https:\/\/([\w-]+)\.(wd[\w-]*)\.myworkdayjobs\.com\/(?:[a-z]{2}-[A-Z]{2}\/)?([^/?#]+)/);
   if (m) {
-=======
-  // Try api: first, then careers_url (mirrors greenhouse/ashby), returning the
-  // first that matches the Workday tenant pattern. This lets a branded page
-  // (e.g. https://www.ptc.com/en/careers) stay as careers_url while the Workday
-  // tenant URL is pinned via api: — and, because we fall through on a non-match,
-  // a non-Workday api: value doesn't shadow a valid careers_url.
-  for (const url of [entry.api, entry.careers_url]) {
-    if (typeof url !== 'string' || !url) continue;
-    const m = url.match(/^https:\/\/([\w-]+)\.(wd[\w-]*)\.myworkdayjobs\.com\/(?:[a-z]{2}-[A-Z]{2}\/)?([^/?#]+)/);
-    if (!m) continue;
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     const [, tenant, instance, site] = m;
     const origin = `https://${tenant}.${instance}.myworkdayjobs.com`;
     return {
@@ -141,7 +129,6 @@ function resolveEndpoint(entry) {
       // externalPath is relative to the site, not the host root — without the
       // site segment the URL 404s.
       jobBase: `${origin}/${site}`,
-<<<<<<< HEAD
     };
   }
 
@@ -160,11 +147,7 @@ function resolveEndpoint(entry) {
     }
   }
 
-=======
-      origin,
-    };
-  }
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
   return null;
 }
 

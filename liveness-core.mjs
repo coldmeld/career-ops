@@ -92,21 +92,8 @@ function hasApplyControl(controls = []) {
   return controls.some((control) => APPLY_PATTERNS.some((pattern) => pattern.test(control)));
 }
 
-<<<<<<< HEAD
-export function classifyLiveness({ status = 0, finalUrl = '', bodyText = '', applyControls = [] } = {}) {
-  // Portals that silently redirect bots to search/login pages produce false
-  // `expired` results (the redirect body matches listing-page or lack-of-apply
-  // heuristics). Return `uncertain` so agents verify manually.
-  try {
-    const host = new URL(finalUrl).hostname.toLowerCase();
-    if (PORTAL_BYPASS_HOSTNAMES.some((p) => p.test(host))) {
-      return { result: 'uncertain', code: 'portal_bypass', reason: `${host} redirects bots — manual verification required` };
-    }
-  } catch { /* invalid URL — fall through to normal checks */ }
-
-=======
 export function classifyLiveness({ status = 0, requestedUrl = '', finalUrl = '', bodyText = '', applyControls = [] } = {}) {
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
   if (status === 404 || status === 410) {
     return { result: 'expired', code: 'http_gone', reason: `HTTP ${status}` };
   }

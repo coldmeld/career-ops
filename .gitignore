@@ -3,12 +3,9 @@ cv.md
 data/applications.md
 data/applications.db
 data/follow-ups.md
-<<<<<<< HEAD
-=======
 data/salary-observations.tsv
 data/status-log.tsv
 data/assessments.tsv
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 data/pipeline.md
 data/scan-history.tsv
 data/scan-runs.tsv
@@ -119,7 +116,6 @@ package-lock.json
 
 # Planning (local scratchpad)
 plan/
-<<<<<<< HEAD
 CLAUDE.md
 AGENTS.md
 modes/pdf.md
@@ -144,8 +140,16 @@ tectonic
 texlive/
 tokenless-scripts.md
 urgent.md
-=======
 
 # Web
 .career-ops-web/logo-cache/
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+.cache/fontconfig
+draft.md
+*.docx
+.claude/settings.json
+.mcp.json
+batch-extract*
+consolidate-archetypes.mjs
+extract-jd*.mjs
+parse*.mjs
+dashboard/career-dashboard.lnk

@@ -4,11 +4,7 @@ description: AI job search command center -- evaluate offers, generate CVs, scan
 arguments: mode
 user_invocable: true
 user-invocable: true
-<<<<<<< HEAD
-argument-hint: "[scan | deep | pdf | latex | cover | eu-swe | oferta | ofertas | apply | batch | tracker | pipeline | contacto | training | project | interview-prep | interview | interview/plan | interview/practice | interview/debrief | patterns | followup | update]"
-=======
 argument-hint: "[scan | deep | pdf | latex | latex-tex | cover | email | add | eu-swe | oferta | ofertas | apply | batch | tracker | agent-inbox | pipeline | contacto | training | project | interview-prep | interview | interview/plan | interview/practice | interview/debrief | patterns | offer-prep | titles | upskill | followup | update]"
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 license: MIT
 ---
 
@@ -167,12 +163,7 @@ Applies to: `auto-pipeline`, `oferta`, `ofertas`, `pdf`, `contacto`, `apply`, `p
 
 ### Standalone modes with profile and custom context
 
-<<<<<<< HEAD
-Applies to: `tracker`, `deep`, `interview-prep`, `interview`, `regional/eu-swe`, `interview/plan`, `interview/practice`, `interview/debrief`, `latex`, `training`, `project`, `patterns`, `followup`, `cover`
-=======
 Read `modes/_profile.md` (if exists) + `modes/_custom.md` (if exists) + `modes/{mode}.md`
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
-
 Applies to: `tracker`, `agent-inbox`, `deep`, `interview-prep`, `interview`, `regional/eu-swe`, `interview/plan`, `interview/practice`, `interview/debrief`, `latex`, `latex-tex`, `training`, `project`, `patterns`, `titles`, `upskill`, `followup`, `cover`, `email`, `add`, `offer-prep`
 
 ### Modes delegated to subagent

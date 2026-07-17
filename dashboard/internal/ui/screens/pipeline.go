@@ -140,30 +140,18 @@ type pipelineTab struct {
 	label  string
 }
 
-<<<<<<< HEAD
-var pipelineTabs = []pipelineTab{
-	{filterAll, "ALL"},
-	{filterEvaluated, "EVALUATED"},
-	{filterApplied, "APPLIED"},
-	{filterResponded, "Responded"},
-	{filterInterview, "INTERVIEW"},
-	{filterTop, "TOP ≥4"},
-	{filterSkip, "SKIP"},
-	{filterRejected, "REJECTED"},
-	{filterDiscarded, "DISCARDED"},
-=======
 func getPipelineTabs() []pipelineTab {
 	return []pipelineTab{
 		{filterAll, i18n.Current.TabAll},
 		{filterEvaluated, i18n.Current.TabEvaluated},
 		{filterApplied, i18n.Current.TabApplied},
+    {filterResponded, i18n.Current.Responded},
 		{filterInterview, i18n.Current.TabInterview},
 		{filterTop, i18n.Current.TabTop},
 		{filterSkip, i18n.Current.TabSkip},
 		{filterRejected, i18n.Current.TabRejected},
 		{filterDiscarded, i18n.Current.TabDiscarded},
 	}
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 }
 
 var sortCycle = []string{sortScore, sortDate, sortCompany, sortStatus, sortLocation, sortPay, sortLast}
@@ -1685,13 +1673,9 @@ func (m PipelineModel) renderAppLine(app model.CareerApplication, selected bool)
 	// Status with color -- fixed column
 	norm := data.NormalizeStatus(app.Status)
 	statusColor := m.statusColorMap()[norm]
-<<<<<<< HEAD
-	statusStyle := lipgloss.NewStyle().Foreground(cellFg(statusColor)).Background(bg).Width(cw.status)
-	statusText := statusStyle.Render(statusLabel(norm))
-=======
 	statusStyle := lipgloss.NewStyle().Foreground(statusColor).Width(cw.status)
 	statusText := statusStyle.Render(truncateRunes(statusLabel(norm), cw.status))
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
 
 	segments := []string{
 		numStyle.Render(truncateRunes(numText, cw.num)),

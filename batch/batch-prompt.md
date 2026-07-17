@@ -75,7 +75,6 @@ Conflict rule: `modes/_profile.md` wins over default system guidance because it 
 
 ---
 
-<<<<<<< HEAD
 ### Paso 1.5 — Pre-check: Experiencia requerida ausente
 
 **Antes de evaluar**, revisar si el JD exige experiencia en un campo o dominio que el candidato no posee.
@@ -95,12 +94,96 @@ Excepción: Si el JD indica explícitamente apertura a candidatos sin esa experi
 Si SKIP: escribir tracker TSV con status `Descartado`, score `N/A`, nota "Required [domain] experience not in profile", y emitir output JSON con `"score": null`. No continuar con Paso 2–4.
 
 ---
+1. Lee el archivo JD en `{{JD_FILE}}`
+2. Si el archivo está vacío o no existe, obtén el JD según el tipo de URL:
+   - **MyCareersFuture** (`mycareersfuture.gov.sg`): extrae el UUID del último segmento del path y llama a `https://api.mycareersfuture.gov.sg/v2/jobs/{uuid}` con WebFetch. Es una SPA — el WebFetch directo a la URL de listado devuelve HTML vacío. El JSON de la API contiene `title`, `description`, `requirements`, `salary`, `skills`, `positionLevels`, `minimumYearsExperience`, y más. Extrae estos campos y escríbelos en `{{JD_FILE}}` como texto plano antes de continuar.
+   - **Cualquier otra URL**: WebFetch directo a `{{URL}}`
+3. Si ambos fallan, reporta error y termina
+
+### Paso 1.5 — Triage: SKIP inmediato antes de evaluación completa
+
+**Antes de evaluar**, aplicar estos checks en orden. El primero que dispara un SKIP termina aquí — no continúes con Paso 2–4. Cuando hay duda, continúa la evaluación: solo SKIP cuando la señal es inequívoca.
+
+#### Check 1 — Archetype excluido
+
+Leer el JD suficiente para detectar el arquetipo dominante. Si mapea a un tipo excluido según `modes/_profile.md` (ej. Mechanical Engineering, Electrical Engineering, IT Infrastructure, Sales Engineer, pure Software Engineer sin componente AI) → **SKIP**.
+
+#### Check 2 — Zero domain overlap
+
+Si los requisitos core del JD no tienen ningún overlap con `cv.md` (dominio completamente ajeno al perfil) → **SKIP**.
+
+#### Check 3 — Experiencia requerida ausente
+
+| Señal en el JD | Acción |
+|----------------|--------|
+| "must have X years of [domain] experience" y candidato no tiene ese domain | SKIP |
+| "[domain] experience required" sin alternativa | SKIP |
+| "[domain] experience preferred / advantageous" (no mandatory) | Continuar — anotar gap |
+| JD ambiguo (mandatory o preferred no claro) | Continuar — marcar incertidumbre en report |
+| JD dice "no experience required" / "training provided" / "entry-level" | Continuar — ignorar el gap |
+
+#### Check 4 — Over-leveled specialist
+
+Si la experiencia requerida excede claramente el nivel del candidato en un dominio especialista (ej. "5+ years as [specialist role]" donde el candidato no tiene esa especialización) → **SKIP**.
+
+#### Check 5 — Fundamental domain mismatch
+
+Si el CV match es claramente < 3.5 debido a mismatch fundamental de dominio — no un gap subsanable con experiencia adyacente, sino dominios que no se tocan — → **SKIP**.
+
+#### Output para triage SKIP
+
+1. Escribir reporte mínimo en `reports/{{REPORT_NUM}}-{company-slug}-{{DATE}}.md`:
+
+```markdown
+# Evaluation: {Company} — {Role}
+
+**Date:** {{DATE}}
+**Archetype:** {detectado}
+**Score:** N/A
+**Legitimacy:** N/A
+**URL:** {{URL}}
+**PDF:** N/A
+**Batch ID:** {{ID}}
+
+---
+
+## Machine Summary
+
+```yaml
+archetype: "{detectado o unknown}"
+score: null
+legitimacy_tier: "N/A"
+final_decision: "Skip"
+hard_stops:
+  - "{razón del SKIP}"
+soft_gaps: []
+top_strengths: []
+risk_level: "N/A"
+confidence: "High"
+next_action: "Do not apply"
+```
+
+## A) Role Summary
+{1-sentence TL;DR y arquetipo detectado}
+
+## B) Match with CV
+**Verdict: SKIP** — {2–3 sentences: qué requisito es el bloqueador y por qué no hay experiencia adyacente que lo cubra}
+
+*Blocks C–G not produced — triage SKIP, full evaluation not warranted.*
+```
+
+2. Escribir tracker TSV a `batch/tracker-additions/{{ID}}.tsv`:
+   - status: `Descartado`, score: `N/A`, pdf: `❌`, nota: razón concisa del SKIP
+
+3. Emitir output JSON con `"score": null, "pdf": null`.
+
+No continuar con Paso 2–4.
+
+---
 
 ### Paso 2 — Evaluación A-G
 =======
 ## Pipeline
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
-
 Run these steps in order.
 
 ### Step 1 — Load the JD
@@ -158,6 +241,7 @@ Use WebSearch for salary bands, company compensation reputation, funding/hiring 
 Before interpreting any salary, classify the **company type / hiring entity**. A public salary figure is a signal, not a contractual promise.
 
 **Company type classification (required):**
+#### Block A — Role Summary
 
 | Company type | Typical comp reliability | Signals |
 |--------------|--------------------------|---------|
@@ -174,6 +258,8 @@ Before interpreting any salary, classify the **company type / hiring entity**. A
 
 If the brand differs from the legal employer or posting entity, classify the **actual contract / hiring entity** first and mention the brand relationship separately. If the company type is uncertain, mark it as `Unknown` and default compensation reliability to the conservative canonical tier: `Low` until evidence improves it.
 
+#### Block B — CV Match
+
 **Compensation reliability (required):**
 
 First check whether the JD itself states a salary figure. If no advertised number exists, collapse this section to exactly two concise lines after the demand trend:
@@ -188,13 +274,17 @@ When an advertised salary figure exists, split compensation into:
 - **Expected stable cash:** what is likely recurring and reliable in cash, before tax unless local data supports a net estimate; exclude benefits
 - **Non-cash benefits:** equity, insurance, pension, meals, transport, wellness, learning budget, equipment, or other benefits that are not guaranteed cash
 
+#### Block C — Level & Strategy
+
 Reliability tier:
 - **High:** salary is stated as base or backed by structured public bands / multiple consistent sources
 - **Medium:** range is plausible but components are not fully separated
 - **Low:** public number likely includes variable, attendance, commission, subsidy, or "up to" components
 - **Unknown:** no usable salary data
 
+#### Block D — Comp & Market
 Treat "comprehensive salary", "total package", "up to", "OTE", "uncapped", "allowances included", "attendance bonus", "KPI bonus", "base + variable", "base + commission", and unusually wide ranges as low-reliability unless fixed base is separated.
+
 
 When a salary figure exists, include 3-6 HR verification questions tailored to the company type. Do not present advertised compensation as real take-home pay unless the source explicitly supports that interpretation.
 
@@ -206,12 +296,13 @@ Comp score:
 - 2 = slightly below market
 - 1 = clearly below market
 
-#### Block E — Personalization Plan
+#### Block E — Customization Plan
 
 Provide a table:
 
 | # | Section | Current state | Proposed change | Why |
 |---|---------|---------------|------------------|-----|
+#### Block F — Interview Plan
 
 Include top CV changes and LinkedIn/profile framing changes.
 
@@ -499,7 +590,6 @@ Failure:
 
 ## Global Rules
 
-<<<<<<< HEAD
 ### NUNCA
 1. Inventar experiencia o métricas
 0. Evaluar un rol que requiere experiencia en un dominio que el candidato no posee — SKIP inmediato (salvo que el JD indique apertura explícita a candidatos sin esa experiencia)
@@ -508,9 +598,8 @@ Failure:
 4. Recomendar comp por debajo de mercado
 5. Generar PDF sin leer primero el JD
 6. Usar corporate-speak
-=======
+
 ### Never
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
 1. Invent experience, credentials, metrics, or links.
 2. Modify user source files such as `cv.md`, `article-digest.md`, `modes/_profile.md`, or `config/profile.yml`.
