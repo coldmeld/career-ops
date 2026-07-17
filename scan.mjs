@@ -150,8 +150,11 @@ export function buildTitleFilter(titleFilter) {
 
   return (title) => {
     const lower = (title || '').toLowerCase();
+    // Strip "senior/" or "senior /" before negative matching so titles like
+    // "Senior/Associate Engineer" don't trip "Senior Engineer"-style negatives.
+    const lowerForNeg = lower.replace(/senior\s*\/\s*/g, '');
     const hasPositive = positive.length === 0 || positive.some(m => m(lower));
-    const hasNegative = negative.some(m => m(lower));
+    const hasNegative = negative.some(m => m(lowerForNeg));
     return hasPositive && !hasNegative;
   };
 }

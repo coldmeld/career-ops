@@ -60,26 +60,89 @@ Aplicación durante la evaluación A-G:
 ### Paso 1 — Obtener JD
 
 1. Lee el archivo JD en `{{JD_FILE}}`
-2. Si el archivo está vacío o no existe, intenta obtener el JD desde `{{URL}}` con WebFetch
+2. Si el archivo está vacío o no existe, obtén el JD según el tipo de URL:
+   - **MyCareersFuture** (`mycareersfuture.gov.sg`): extrae el UUID del último segmento del path y llama a `https://api.mycareersfuture.gov.sg/v2/jobs/{uuid}` con WebFetch. Es una SPA — el WebFetch directo a la URL de listado devuelve HTML vacío. El JSON de la API contiene `title`, `description`, `requirements`, `salary`, `skills`, `positionLevels`, `minimumYearsExperience`, y más. Extrae estos campos y escríbelos en `{{JD_FILE}}` como texto plano antes de continuar.
+   - **Cualquier otra URL**: WebFetch directo a `{{URL}}`
 3. Si ambos fallan, reporta error y termina
 
-### Paso 1.5 — Pre-check: Experiencia requerida ausente
+### Paso 1.5 — Triage: SKIP inmediato antes de evaluación completa
 
-**Antes de evaluar**, revisar si el JD exige experiencia en un campo o dominio que el candidato no posee.
+**Antes de evaluar**, aplicar estos checks en orden. El primero que dispara un SKIP termina aquí — no continúes con Paso 2–4. Cuando hay duda, continúa la evaluación: solo SKIP cuando la señal es inequívoca.
 
-**REGLA: Si el JD REQUIERE experiencia en un campo que el candidato no tiene → SKIP inmediato. No generar report completo ni PDF.**
+#### Check 1 — Archetype excluido
 
-Excepción: Si el JD indica explícitamente apertura a candidatos sin esa experiencia (ej. "no prior experience required", "training provided", "fresh graduates welcome", "entry-level", "career changers welcome") → continuar evaluación normal y anotar el gap.
+Leer el JD suficiente para detectar el arquetipo dominante. Si mapea a un tipo excluido según `modes/_profile.md` (ej. Mechanical Engineering, Electrical Engineering, IT Infrastructure, Sales Engineer, pure Software Engineer sin componente AI) → **SKIP**.
+
+#### Check 2 — Zero domain overlap
+
+Si los requisitos core del JD no tienen ningún overlap con `cv.md` (dominio completamente ajeno al perfil) → **SKIP**.
+
+#### Check 3 — Experiencia requerida ausente
 
 | Señal en el JD | Acción |
 |----------------|--------|
-| "must have X years of [domain] experience" y candidato no tiene ese domain | SKIP — nota: "Requires [domain] experience — not in profile" |
+| "must have X years of [domain] experience" y candidato no tiene ese domain | SKIP |
 | "[domain] experience required" sin alternativa | SKIP |
 | "[domain] experience preferred / advantageous" (no mandatory) | Continuar — anotar gap |
 | JD ambiguo (mandatory o preferred no claro) | Continuar — marcar incertidumbre en report |
-| JD dice "no experience required" / "training provided" | Continuar — ignorar el gap |
+| JD dice "no experience required" / "training provided" / "entry-level" | Continuar — ignorar el gap |
 
-Si SKIP: escribir tracker TSV con status `Descartado`, score `N/A`, nota "Required [domain] experience not in profile", y emitir output JSON con `"score": null`. No continuar con Paso 2–4.
+#### Check 4 — Over-leveled specialist
+
+Si la experiencia requerida excede claramente el nivel del candidato en un dominio especialista (ej. "5+ years as [specialist role]" donde el candidato no tiene esa especialización) → **SKIP**.
+
+#### Check 5 — Fundamental domain mismatch
+
+Si el CV match es claramente < 3.5 debido a mismatch fundamental de dominio — no un gap subsanable con experiencia adyacente, sino dominios que no se tocan — → **SKIP**.
+
+#### Output para triage SKIP
+
+1. Escribir reporte mínimo en `reports/{{REPORT_NUM}}-{company-slug}-{{DATE}}.md`:
+
+```markdown
+# Evaluation: {Company} — {Role}
+
+**Date:** {{DATE}}
+**Archetype:** {detectado}
+**Score:** N/A
+**Legitimacy:** N/A
+**URL:** {{URL}}
+**PDF:** N/A
+**Batch ID:** {{ID}}
+
+---
+
+## Machine Summary
+
+```yaml
+archetype: "{detectado o unknown}"
+score: null
+legitimacy_tier: "N/A"
+final_decision: "Skip"
+hard_stops:
+  - "{razón del SKIP}"
+soft_gaps: []
+top_strengths: []
+risk_level: "N/A"
+confidence: "High"
+next_action: "Do not apply"
+```
+
+## A) Role Summary
+{1-sentence TL;DR y arquetipo detectado}
+
+## B) Match with CV
+**Verdict: SKIP** — {2–3 sentences: qué requisito es el bloqueador y por qué no hay experiencia adyacente que lo cubra}
+
+*Blocks C–G not produced — triage SKIP, full evaluation not warranted.*
+```
+
+2. Escribir tracker TSV a `batch/tracker-additions/{{ID}}.tsv`:
+   - status: `Descartado`, score: `N/A`, pdf: `❌`, nota: razón concisa del SKIP
+
+3. Emitir output JSON con `"score": null, "pdf": null`.
+
+No continuar con Paso 2–4.
 
 ---
 
@@ -123,11 +186,11 @@ Clasifica la oferta en uno de los 6 arquetipos. Si es híbrido, indica los 2 má
 
 Convertir "builder" en señal profesional, no en "hobby maker". El framing cambia, la verdad es la misma.
 
-#### Bloque A — Resumen del Rol
+#### Block A — Role Summary
 
 Tabla con: Arquetipo detectado, Domain, Function, Seniority, Remote, Team size, TL;DR.
 
-#### Bloque B — Match con CV
+#### Block B — CV Match
 
 Read `cv.md`. Tabla con cada requisito del JD mapeado a líneas exactas del CV o keys de i18n.ts.
 
@@ -145,26 +208,26 @@ Sección de **gaps** con estrategia de mitigación para cada uno:
 3. ¿Hay un proyecto portfolio que cubra este gap?
 4. Plan de mitigación concreto
 
-#### Bloque C — Nivel y Estrategia
+#### Block C — Level & Strategy
 
 1. **Nivel detectado** en el JD vs **candidate's natural level**
 2. **Plan "vender senior sin mentir"**: frases específicas, logros concretos, founder como ventaja
 3. **Plan "si me downlevelan"**: aceptar si comp justa, review a 6 meses, criterios claros
 
-#### Bloque D — Comp y Demanda
+#### Block D — Comp & Market
 
 Usar WebSearch para salarios actuales (Glassdoor, Levels.fyi, Blind), reputación comp de la empresa, tendencia demanda. Tabla con datos y fuentes citadas. Si no hay datos, decirlo.
 
 Score de comp (1-5): 5=top quartile, 4=above market, 3=median, 2=slightly below, 1=well below.
 
-#### Bloque E — Plan de Personalización
+#### Block E — Customization Plan
 
 | # | Sección | Estado actual | Cambio propuesto | Por qué |
 |---|---------|---------------|------------------|---------|
 
 Top 5 cambios al CV + Top 5 cambios a LinkedIn.
 
-#### Bloque F — Plan de Entrevistas
+#### Block F — Interview Plan
 
 6-10 historias STAR mapeadas a requisitos del JD:
 
@@ -241,10 +304,10 @@ Donde `{company-slug}` es el nombre de empresa en lowercase, sin espacios, con g
 **Formato del report:**
 
 ```markdown
-# Evaluación: {Empresa} — {Rol}
+# Evaluation: {Company} — {Role}
 
-**Fecha:** {{DATE}}
-**Arquetipo:** {detectado}
+**Date:** {{DATE}}
+**Archetype:** {detectado}
 **Score:** {X/5}
 **Legitimacy:** {High Confidence | Proceed with Caution | Suspicious}
 **URL:** {URL de la oferta original}
@@ -273,31 +336,31 @@ confidence: "{Low | Medium | High}"
 next_action: "{one concrete next step}"
 ```
 
-## A) Resumen del Rol
-(contenido completo)
+## A) Role Summary
+(full content)
 
-## B) Match con CV
-(contenido completo)
+## B) CV Match
+(full content)
 
-## C) Nivel y Estrategia
-(contenido completo)
+## C) Level & Strategy
+(full content)
 
-## D) Comp y Demanda
-(contenido completo)
+## D) Comp & Market
+(full content)
 
-## E) Plan de Personalización
-(contenido completo)
+## E) Customization Plan
+(full content)
 
-## F) Plan de Entrevistas
-(contenido completo)
+## F) Interview Plan
+(full content)
 
 ## G) Posting Legitimacy
-(contenido completo)
+(full content)
 
 ---
 
-## Keywords extraídas
-(15-20 keywords del JD para ATS)
+## Extracted Keywords
+(15-20 keywords from JD for ATS)
 ```
 
 ### Paso 4 — Generar PDF (configurable)

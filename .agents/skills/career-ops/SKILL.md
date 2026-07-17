@@ -122,8 +122,10 @@ Or paste a JD directly to run the full pipeline.
 
 After determining the mode, load the necessary files before executing:
 
-### Modes that require `_shared.md` + their mode file:
-Read `modes/_shared.md` + `modes/{mode}.md`
+### Modes that require `_shared.md` + `_custom.md` + their mode file:
+Read `modes/_shared.md` + `modes/_custom.md` + `modes/{mode}.md`
+
+**Always read `_custom.md`.** It contains portal-specific extraction rules (e.g. MCF API instead of Playwright), active house rules, and output preferences that override defaults in `_shared.md`. Skipping it causes avoidable token waste (wrong extraction method, missed short-circuits).
 
 Applies to: `auto-pipeline`, `oferta`, `ofertas`, `pdf`, `contacto`, `apply`, `pipeline`, `scan`, `batch`
 
@@ -133,12 +135,12 @@ Read `modes/{mode}.md`
 Applies to: `tracker`, `deep`, `interview-prep`, `interview`, `regional/eu-swe`, `interview/plan`, `interview/practice`, `interview/debrief`, `latex`, `training`, `project`, `patterns`, `followup`, `cover`
 
 ### Modes delegated to subagent:
-For `scan`, `apply` (with Playwright), and `pipeline` (3+ URLs): launch as a worker/subagent with the content of `_shared.md` + `modes/{mode}.md` injected into the worker prompt. If your CLI exposes an `Agent(...)` primitive, the call looks like this:
+For `scan`, `apply` (with Playwright), and `pipeline` (3+ URLs): launch as a worker/subagent with the content of `_shared.md` + `_custom.md` + `modes/{mode}.md` injected into the worker prompt. If your CLI exposes an `Agent(...)` primitive, the call looks like this:
 
 ```
 Agent(
   subagent_type="general-purpose",
-  prompt="[content of modes/_shared.md]\n\n[content of modes/{mode}.md]\n\n[invocation-specific data]",
+  prompt="[content of modes/_shared.md]\n\n[content of modes/_custom.md]\n\n[content of modes/{mode}.md]\n\n[invocation-specific data]",
   description="career-ops {mode}"
 )
 ```

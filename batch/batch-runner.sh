@@ -37,6 +37,9 @@ MAX_RETRIES=2
 MIN_SCORE=0
 SKIP_PDF=false
 MODEL=""  # empty = let claude -p use the Claude Max default
+ESCALATE_MODEL=""  # model for borderline re-evaluation (empty = disabled)
+ESCALATE_MIN=3.2   # escalate if score >= this value
+ESCALATE_MAX=4.2   # escalate if score <= this value
 RATE_LIMIT_SLEEP=300
 BATCH_PAUSED=false
 STATUS_ONLY=false
@@ -69,7 +72,11 @@ Options:
                        (default: 300)
   --model NAME         Claude model passed to `claude -p --model` (default:
                        unset = Claude Max default). Use a cheaper model for
-                       large batches, e.g. `--model claude-sonnet-4-6`.
+                       large batches, e.g. `--model claude-haiku-4-5-20251001`.
+  --escalate-model NAME  Re-run borderline offers with NAME after the fast first pass.
+                         Pair with --model for a cheap/smart two-pass pipeline.
+  --escalate-min N     Lower bound of escalation score range (default: 3.2)
+  --escalate-max N     Upper bound of escalation score range (default: 4.2)
   --status             Show batch progress and a per-job table, then exit
   --watch              Live-refresh progress until the run completes
   -h, --help           Show this help
@@ -93,6 +100,9 @@ Examples:
 
   # Process 2 at a time starting from ID 10
   ./batch-runner.sh --parallel 2 --start-from 10
+
+  # Haiku for bulk, Sonnet re-evaluates borderline scores (3.2-4.2)
+  ./batch-runner.sh --model claude-haiku-4-5-20251001 --escalate-model claude-sonnet-4-6
 USAGE
 }
 
@@ -114,6 +124,9 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --model) MODEL="$2"; shift 2 ;;
+    --escalate-model) ESCALATE_MODEL="$2"; shift 2 ;;
+    --escalate-min) ESCALATE_MIN="$2"; shift 2 ;;
+    --escalate-max) ESCALATE_MAX="$2"; shift 2 ;;
     --status) STATUS_ONLY=true; shift ;;
     --watch) WATCH_MODE=true; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -308,6 +321,7 @@ next_report_num_unlocked() {
       local basename
       basename=$(basename "$f")
       local num="${basename%%-*}"
+      [[ "$num" =~ ^[0-9]+$ ]] || continue  # skip non-numeric filenames (e.g. pattern-analysis-*.md)
       num=$((10#$num)) # Remove leading zeros for arithmetic
       if (( num > max_num )); then
         max_num=$num
@@ -531,9 +545,6 @@ process_offer() {
     break
   done
 
-  # Cleanup resolved prompt
-  rm -f "$resolved_prompt"
-
   local completed_at
   completed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
@@ -546,11 +557,35 @@ process_offer() {
       score="$score_match"
     fi
 
+    # Two-pass escalation: re-run borderline scores with a stronger model
+    if [[ -n "$ESCALATE_MODEL" && "$score" != "-" ]] && is_decimal_number "$score"; then
+      if awk -v s="$score" -v lo="$ESCALATE_MIN" -v hi="$ESCALATE_MAX" \
+          'BEGIN{exit !(s+0 >= lo+0 && s+0 <= hi+0)}'; then
+        echo "    🔄 Score $score in [$ESCALATE_MIN-$ESCALATE_MAX]; escalating to $ESCALATE_MODEL"
+        local escalate_log="$LOGS_DIR/${report_num}-${id}-escalate.log"
+        local -a esc_args=(-p --dangerously-skip-permissions --strict-mcp-config --model "$ESCALATE_MODEL")
+        esc_args+=(--append-system-prompt-file "$resolved_prompt" "$prompt")
+        if claude "${esc_args[@]}" > "$escalate_log" 2>&1; then
+          local esc_score
+          esc_score=$(sed -nE 's/.*"score":[[:space:]]*([0-9.]+).*/\1/p' "$escalate_log" 2>/dev/null | head -1 || true)
+          if [[ -n "$esc_score" ]]; then
+            score="$esc_score"
+            echo "    ↳ Escalated score: $score"
+          fi
+          cp "$escalate_log" "$log_file"
+        else
+          echo "    ⚠️  Escalation failed; keeping fast-model result (score: $score)"
+        fi
+        completed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+      fi
+    fi
+
     # Check min-score gate
     if is_decimal_number "$score" && awk -v min="$MIN_SCORE" 'BEGIN{exit !(min > 0)}'; then
       if awk -v score="$score" -v min="$MIN_SCORE" 'BEGIN{exit !(score < min)}'; then
         update_state "$id" "$url" "skipped" "$started_at" "$completed_at" "$report_num" "$score" "below-min-score" "$retries"
         echo "    ⏭️  Skipped (score: $score < min-score: $MIN_SCORE)"
+        rm -f "$resolved_prompt"
         return 0
       fi
     fi
@@ -566,6 +601,9 @@ process_offer() {
     update_state "$id" "$url" "failed" "$started_at" "$completed_at" "$report_num" "-" "$error_msg" "$retries"
     echo "    ❌ Failed (attempt $retries, exit code $exit_code)"
   fi
+
+  # Cleanup resolved prompt (kept alive through escalation above)
+  rm -f "$resolved_prompt"
 }
 
 # Merge tracker additions into applications.md

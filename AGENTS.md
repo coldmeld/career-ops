@@ -296,6 +296,9 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 | Asks about rejection patterns or wants to improve targeting | `patterns` |
 | Asks about follow-ups or application cadence | `followup` |
 | Wants to update the system | `update` |
+| Wants to run a maintenance script or pipeline tool | `scripts` |
+| Wants to feed pipeline into batch and run it | `pipeBatch` |
+| Wants to pull unread job alert emails and add to pipeline | `email-scan` |
 
 ### CV Source of Truth
 

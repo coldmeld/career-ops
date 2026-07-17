@@ -60,8 +60,12 @@ function buildEducation(entries) {
   for (const e of entries) {
     if (!e) continue;
     let block = `    \\resumeSubheading\n      {${escapeLatex(e.institution)}}{${escapeLatex(e.dates)}}\n      {${escapeLatex(e.degree)}}{${escapeLatex(e.location)}}`;
-    if (Array.isArray(e.coursework) && e.coursework.length > 0) {
-      const items = e.coursework.map(c => `            \\resumeItem{${escapeLatex(c)}}`).join('\n');
+    const COURSE_CODE_RE = /^[A-Z]{2}\d{4}/;
+    const eduItems = (e.bullets || []).concat(
+      (e.coursework || []).filter(c => !COURSE_CODE_RE.test(c))
+    );
+    if (eduItems.length > 0) {
+      const items = eduItems.map(c => `            \\resumeItem{${escapeLatex(c)}}`).join('\n');
       block += `\n        \\resumeItemListStart\n${items}\n        \\resumeItemListEnd`;
     }
     blocks.push(block);
@@ -228,7 +232,7 @@ async function runSelfTest() {
     email: { url: 'test@example.com', display: 'test@example.com' },
     linkedin: { url: 'https://linkedin.com/in/test', display: 'linkedin.com/in/test' },
     github: { url: 'https://github.com/test', display: 'github.com/test' },
-    summary: 'Experienced engineer with a strong background in testing and automation. Skilled in building reliable systems and driving continuous improvement across cross-functional teams.',
+    summary_text: 'Experienced engineer with a strong background in testing and automation. Skilled in building reliable systems and driving continuous improvement across cross-functional teams.',
     competencies: ['Automated Testing', 'CI/CD Pipelines', 'Python', 'System Design', 'Cross-functional Collaboration'],
     education: [{
       institution: 'Test University',
@@ -294,7 +298,7 @@ async function runSelfTest() {
     EMAIL_URL: emailUrl,
     EMAIL_DISPLAY: escapeLatex(emailDisplay),
     SOCIAL_LINKS: socialLinks,
-    SUMMARY: buildSummary(sample.summary),
+    SUMMARY_TEXT: buildSummary(sample.summary_text),
     COMPETENCIES: buildCompetencies(sample.competencies),
     EDUCATION: buildEducation(sample.education),
     EXPERIENCE: buildExperience(sample.experience),
