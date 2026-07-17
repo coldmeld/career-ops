@@ -66,7 +66,11 @@ export function DiscoveryCard({ offer, inPipeline, evaluatedN }: { offer: Discov
     <div className="co-rise group flex min-w-0 flex-col gap-2.5 rounded-xl border border-border bg-surface/40 p-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-sm">
       <div className="flex items-start gap-3">
         <Logo company={offer.company} />
+<<<<<<< HEAD
         <a href={offer.url} target="_blank" rel="noopener noreferrer" className="block min-w-0 flex-1">
+=======
+        <a href={offer.url} target="_blank" rel="noopener noreferrer" className="block min-w-0 flex-1 max-sm:min-h-[44px]">
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           <h3 className={`${instrumentSerif.className} truncate text-[17px] leading-tight text-foreground transition-colors group-hover:text-brand`}>{offer.title}</h3>
           <p className="mt-0.5 truncate text-[13px] text-muted">
             {offer.company}
@@ -79,7 +83,11 @@ export function DiscoveryCard({ offer, inPipeline, evaluatedN }: { offer: Discov
           rel="noopener noreferrer"
           title="Open the posting"
           aria-label="Open the posting"
+<<<<<<< HEAD
           className="-m-1 shrink-0 rounded p-1 text-faint transition-colors hover:text-foreground"
+=======
+          className="-m-1 inline-flex shrink-0 items-center justify-center rounded p-1 text-faint transition-colors hover:text-foreground max-sm:min-h-[44px] max-sm:min-w-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
         >
           <ExternalLink className="size-4" />
         </a>
@@ -114,7 +122,11 @@ export function DiscoveryCard({ offer, inPipeline, evaluatedN }: { offer: Discov
         {evaluatedN || doneEval ? (
           <a
             href={evaluatedN ? `/pipeline/${evaluatedN}` : job ? `/jobs/${job.id}` : "/pipeline"}
+<<<<<<< HEAD
             className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-brand-soft px-2.5 py-2 text-xs font-medium text-brand"
+=======
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-brand-soft px-2.5 py-2 text-xs font-medium text-brand max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           >
             <Check className="size-3.5" /> Evaluated · view report
           </a>
@@ -131,7 +143,11 @@ export function DiscoveryCard({ offer, inPipeline, evaluatedN }: { offer: Discov
               disabled={isAdded || isAdding}
               onClick={() => addToPipeline([offer])}
               className={cn(
+<<<<<<< HEAD
                 "inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-xs font-medium transition-colors",
+=======
+                "inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-xs font-medium transition-colors max-sm:min-h-[44px]",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
                 isAdded ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-surface-hover text-foreground hover:bg-brand-soft hover:text-brand",
               )}
             >
@@ -142,7 +158,11 @@ export function DiscoveryCard({ offer, inPipeline, evaluatedN }: { offer: Discov
               type="button"
               onClick={evaluate}
               title={unverified ? "Runs a real evaluation — and verifies the posting is live. Uses tokens." : "Runs a real A–F evaluation. Uses tokens."}
+<<<<<<< HEAD
               className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-brand/30 px-2.5 py-2 text-xs font-medium text-brand transition-colors hover:bg-brand-soft"
+=======
+              className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-brand/30 px-2.5 py-2 text-xs font-medium text-brand transition-colors hover:bg-brand-soft max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
             >
               Evaluate <Coins className="size-3.5 opacity-80" />
             </button>

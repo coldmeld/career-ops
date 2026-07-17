@@ -44,7 +44,11 @@ export function StatusSelect({ n, current }: { n: string; current: string }) {
         value={status}
         onChange={onChange}
         disabled={busy}
+<<<<<<< HEAD
         className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm text-foreground outline-none transition-colors focus:border-brand/50 disabled:opacity-50"
+=======
+        className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm text-foreground outline-none transition-colors focus:border-brand/50 disabled:opacity-50 max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       >
         {!known && <option value={status}>{status}</option>}
         {CANONICAL_STATES.map((s) => (

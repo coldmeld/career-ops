@@ -71,7 +71,11 @@ export function TodayDashboard({
   const inboxUrls = useMemo(() => new Set(inbox.map((j) => j.url)), [inbox]);
 
   return (
+<<<<<<< HEAD
     <div className="mx-auto max-w-5xl px-6 py-10">
+=======
+    <div className="mx-auto max-w-5xl px-6 py-10 max-sm:pb-24">
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       <section className="dot-bg relative overflow-hidden rounded-2xl border border-border bg-surface/40 px-7 py-10 md:px-10 md:py-12">
         <HeroGlow />
         {/* Readability scrim between the animated glow (z-0) and the copy (z-10). */}
@@ -103,10 +107,17 @@ export function TodayDashboard({
             {allClear ? "I'll keep scanning the market in the background and surface anything that fits." : "Your action queue for today — discovery and follow-ups, in one place."}
           </p>
           <div className="mt-6 flex flex-wrap gap-2.5">
+<<<<<<< HEAD
             <Link href="/explore" className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-brand-foreground transition hover:bg-brand-200">
               Find new roles <ArrowRight className="size-4" />
             </Link>
             <Link href="/pipeline" className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-brand/40 hover:text-brand">
+=======
+            <Link href="/explore" className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-brand-foreground transition hover:bg-brand-200 max-sm:min-h-[44px]">
+              Find new roles <ArrowRight className="size-4" />
+            </Link>
+            <Link href="/pipeline" className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-brand/40 hover:text-brand max-sm:min-h-[44px]">
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
               Open pipeline
             </Link>
           </div>
@@ -116,7 +127,11 @@ export function TodayDashboard({
 
       {/* A. Follow-ups due (demand loop) */}
       {followups.length > 0 && (
+<<<<<<< HEAD
         <Section icon={Bell} title="Follow-ups due" hint="Keep your applications alive · data/follow-ups.md">
+=======
+        <Section icon={Bell} title="Follow-ups due" hint="Keep your applications alive — a nudge beats silence">
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           <div className="grid gap-2.5">
             {followups.map((f) => (
               <FollowUpCard key={`${f.num}-${f.company}`} followup={f} onLogged={() => setOverdue((n) => Math.max(0, n - 1))} />
@@ -145,7 +160,11 @@ export function TodayDashboard({
             ))}
           </div>
           {fresh.length > 6 && (
+<<<<<<< HEAD
             <Link href="/explore" className="mt-3 inline-block text-sm text-muted transition hover:text-brand">
+=======
+            <Link href="/explore" className="mt-3 inline-flex items-center text-sm text-muted transition hover:text-brand max-sm:min-h-[44px]">
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
               See all {fresh.length} →
             </Link>
           )}
