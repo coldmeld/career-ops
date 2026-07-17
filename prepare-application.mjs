@@ -15,19 +15,11 @@
  * Supported ATS:
  *   Greenhouse  boards.greenhouse.io / greenhouse.io
  *   Ashby       jobs.ashbyhq.com / ashbyhq.com
-<<<<<<< HEAD
- *   Lever       jobs.lever.co / lever.co
- */
-
-import { readFileSync, existsSync, statSync } from 'fs';
-import { basename, resolve, dirname } from 'path';
-=======
  *   Lever       jobs.(eu.)?lever.co / lever.co
  */
 
 import { readFileSync, existsSync, statSync } from 'fs';
 import { basename, resolve, dirname, relative, isAbsolute } from 'path';
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 import { fileURLToPath } from 'url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
@@ -38,10 +30,7 @@ const ALLOWED_HOSTS = new Set([
   'jobs.ashbyhq.com',
   'ashbyhq.com',
   'jobs.lever.co',
-<<<<<<< HEAD
-=======
   'jobs.eu.lever.co',
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   'lever.co',
 ]);
 
@@ -64,12 +53,8 @@ if (!applyUrl || !pdfPath) {
 const outputDir = resolve(ROOT, 'output');
 const absPdf    = resolve(ROOT, pdfPath);
 
-<<<<<<< HEAD
-if (!absPdf.startsWith(outputDir + '/') && absPdf !== outputDir) {
-=======
 const relPdf = relative(outputDir, absPdf);
 if (relPdf === '' || relPdf.startsWith('..') || isAbsolute(relPdf)) {
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   console.error(`Error: --pdf must point to a file inside output/ (got ${pdfPath})`);
   process.exit(1);
 }
@@ -115,11 +100,7 @@ function detectAts(url) {
   const path = url.pathname;
   const GH  = new Set(['boards.greenhouse.io', 'greenhouse.io']);
   const ASH = new Set(['jobs.ashbyhq.com', 'ashbyhq.com']);
-<<<<<<< HEAD
-  const LEV = new Set(['jobs.lever.co', 'lever.co']);
-=======
   const LEV = new Set(['jobs.lever.co', 'jobs.eu.lever.co', 'lever.co']);
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
   const gh = path.match(/^\/([^/]+)\/jobs\/(\d+)/);
   if (gh && GH.has(url.hostname)) {

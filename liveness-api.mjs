@@ -2,17 +2,10 @@
 /**
  * liveness-api.mjs — zero-token liveness check for ATS-hosted job postings.
  *
-<<<<<<< HEAD
- * Many postings live on ATS platforms (Greenhouse, Lever, Ashby, ...) that expose
- * a public JSON endpoint. We can confirm whether a posting is still live by hitting
- * that endpoint directly — no browser, no LLM tokens — and only fall back to the
- * Playwright check (liveness-browser.mjs) for non-ATS pages or when the API is
-=======
  * Many postings live on ATS platforms (Greenhouse, Lever, Ashby, Workday, ...) that
  * expose a public JSON endpoint. We can confirm whether a posting is still live by
  * hitting that endpoint directly — no browser, no LLM tokens — and only fall back to
  * the Playwright check (liveness-browser.mjs) for non-ATS pages or when the API is
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
  * inconclusive. This is the cheap first rung of the liveness ladder.
  *
  * CONSERVATIVE BY DESIGN: a false "expired" is worse than the status quo (the user
@@ -21,13 +14,8 @@
  * `null` (→ caller falls back to Playwright).
  *
  * Two endpoint shapes:
-<<<<<<< HEAD
- *   - Per-job (Greenhouse, Lever): the URL maps to a single-job endpoint, so a 200
- *     is itself proof the posting is live.
-=======
  *   - Per-job (Greenhouse, Lever, Workday): the URL maps to a single-job endpoint,
  *     so a 200 is itself proof the posting is live.
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
  *   - Org-level (Ashby): the URL maps to the org's whole job board. A 200 only
  *     proves the board exists, so the provider's `interpret` step parses the board
  *     and confirms THIS posting is still listed before returning active/expired.
@@ -44,8 +32,6 @@ const TIMEOUT_MS = 8_000;
 // rejected before it can reach the fixed-host API URL template.
 const SAFE_SEGMENT = /^[A-Za-z0-9._-]+$/;
 
-<<<<<<< HEAD
-=======
 // Most providers extract single path segments (SAFE_SEGMENT covers those directly).
 // Workday's job path is genuinely multi-segment (a location slug + a title slug,
 // e.g. "Toronto-ON-CAN/Agentic-AI-Engineer_R260010125"), so a `parts` value may
@@ -62,7 +48,6 @@ function isSafeValue(v) {
   return v.split('/').every((seg) => seg.length > 0 && SAFE_SEGMENT.test(seg) && !seg.includes('..'));
 }
 
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 // Each ATS: detect its posting URL, then map to a public JSON API URL.
 // `match` returns the extracted path params (or null); `api` builds the FIXED-host URL.
 // Optional per-provider fields:
@@ -144,33 +129,6 @@ const ATS_PROVIDERS = [
     api: ({ tenant, shard, site, jobPath }) =>
       `https://${tenant}.${shard}.myworkdayjobs.com/wday/cxs/${tenant}/${site}/job/${jobPath}`,
   },
-  {
-    id: 'ashby',
-    // jobs.ashbyhq.com/{org}/{jobId}[/application]. Ashby's public posting API is
-    // ORG-level (the whole job board), not per-job — so `api` maps to the board and
-    // `interpret` confirms this {jobId} is still listed. Only {org} reaches the
-    // fixed-host URL; {jobId} is used solely to filter the parsed board (SAFE_SEGMENT
-    // still validates both).
-    match(u) {
-      if (u.hostname !== 'jobs.ashbyhq.com') return null;
-      const m = u.pathname.match(/^\/([^/]+)\/([^/]+)(?:\/application)?\/?$/);
-      return m ? { org: m[1], jobId: m[2] } : null;
-    },
-    api: ({ org }) => `https://api.ashbyhq.com/posting-api/job-board/${org}`,
-    // Ashby's posting-api has a server-side latency floor and rate-limits repeated
-    // unauthenticated hits (see providers/ashby.mjs). Give it more room than the ATS
-    // default so a slow-but-live board doesn't time out into a Playwright fallback.
-    timeoutMs: 20_000,
-    async interpret(res, { jobId }) {
-      let json;
-      try {
-        json = await res.json();
-      } catch {
-        return null; // unparseable body → inconclusive, let the browser decide
-      }
-      return classifyAshbyBoard(json, jobId);
-    },
-  },
 ];
 
 /**
@@ -214,15 +172,10 @@ export function resolveAtsApi(rawUrl) {
   for (const provider of ATS_PROVIDERS) {
     const parts = provider.match(u);
     if (!parts) continue;
-<<<<<<< HEAD
-    // SSRF guard: every derived segment must be a single safe path segment.
-    if (!Object.values(parts).every((v) => SAFE_SEGMENT.test(v) && !v.includes('..'))) return null;
-=======
     // SSRF guard: every derived value must be safe — a single path segment for
     // most providers, or (Workday) a slash-separated sequence of safe segments.
     // isSafeValue enforces the same charset + no-".." rule either way.
     if (!Object.values(parts).every(isSafeValue)) return null;
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     return { ats: provider.id, apiUrl: provider.api(parts), parts, timeoutMs: provider.timeoutMs, interpret: provider.interpret };
   }
   return null;

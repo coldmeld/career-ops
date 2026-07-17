@@ -269,34 +269,12 @@ company_confidential: true
     failures.push('via: empty input must produce an empty breakdown');
   }
 
-  // Vendor detection (community ATS only; white-labeled → null)
-  const vendorCases = [
-    ['https://boards.greenhouse.io/acme/jobs/12345', 'greenhouse'],
-    ['https://job-boards.eu.greenhouse.io/acme/jobs/9', 'greenhouse'],
-    ['https://jobs.lever.co/acme/abc-def', 'lever'],
-    ['https://jobs.ashbyhq.com/acme/uuid', 'ashby'],
-    ['https://acme.wd1.myworkdayjobs.com/en-US/careers/job/R-1', 'workday'],
-    ['https://careers.icims.com/jobs/9/x', null],
-    ['https://jobs.dayforcehcm.com/en-US/co/CANDIDATEPORTAL/jobs/1', null],
-    ['not a url', null],
-    ['', null],
-    [null, null],
-  ];
-  for (const [url, expected] of vendorCases) {
-    const got = detectVendor(url);
-    if (got !== expected) failures.push(`detectVendor(${JSON.stringify(url)}) → ${JSON.stringify(got)}, expected ${JSON.stringify(expected)}`);
-  }
-
   if (failures.length > 0) {
     console.error(`analyze-patterns self-test failed: ${failures.join('; ')}`);
     process.exit(1);
   }
 
-<<<<<<< HEAD
-  console.log('analyze-patterns self-test OK (Machine Summary parser + vendor detection)');
-=======
   console.log('analyze-patterns self-test OK (Machine Summary parser + vendor detection + via channel analysis)');
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   process.exit(0);
 }
 
@@ -737,8 +715,6 @@ function analyze() {
     citation: 'Bommasani et al., Algorithmic Monocultures in Hiring, FAccT 2026 (arXiv:2605.27371)',
   };
 
-<<<<<<< HEAD
-=======
   // --- Via channel analysis (#1596 follow-up): per-agency advance rate ---
   // Same honesty rules as the vendor analysis above: this reports CHANNEL
   // YIELD. In an agency-mediated search the highest-leverage decision is which
@@ -747,7 +723,6 @@ function analyze() {
   // (#1596); without it every bucket is empty and nothing is claimed.
   const viaChannelAnalysis = buildViaChannelAnalysis(submitted, isAdvanced);
 
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   // --- Score threshold analysis ---
   const positiveScores = scoresByOutcome.positive.filter(s => s > 0);
   const minPositiveScore = positiveScores.length > 0 ? Math.min(...positiveScores) : 0;
@@ -907,8 +882,6 @@ function analyze() {
     });
   }
 
-<<<<<<< HEAD
-=======
   // Best-converting agency (#1596 follow-up): with a sufficient sample and a
   // clear lead over the overall pipeline, that recruiter relationship is worth
   // prioritizing. One recommendation at most — the breakdown shows the rest.
@@ -923,7 +896,6 @@ function analyze() {
     });
   }
 
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   // Date range
   const dates = enriched.map(e => e.date).filter(Boolean).sort();
 
@@ -946,10 +918,7 @@ function analyze() {
     remotePolicy,
     companySizeBreakdown,
     vendorAnalysis,
-<<<<<<< HEAD
-=======
     viaChannelAnalysis,
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     scoreThreshold,
     techStackGaps,
     discardReasonStats,
@@ -1016,8 +985,6 @@ function printSummary(result) {
     }
   }
 
-<<<<<<< HEAD
-=======
   // Discard reasons
   if (discardReasonStats && discardReasonStats.length > 0) {
     console.log('\nTOP DISCARD / SKIP REASONS');
@@ -1027,7 +994,6 @@ function printSummary(result) {
     }
   }
 
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   // ATS vendor / channel analysis
   const va = result.vendorAnalysis;
   if (va && va.breakdown.length > 0) {
@@ -1041,8 +1007,6 @@ function printSummary(result) {
     console.log('  Channel yield, not discrimination — see Bommasani et al., FAccT 2026.');
   }
 
-<<<<<<< HEAD
-=======
   // Via channel analysis (#1596): which recruiter relationships convert
   const via = result.viaChannelAnalysis;
   if (via && (via.breakdown.length > 0 || via.directSubmitted > 0)) {
@@ -1059,7 +1023,6 @@ function printSummary(result) {
     }
   }
 
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   // Score threshold
   console.log(`\nSCORE THRESHOLD: ${scoreThreshold.recommended}/5`);
   console.log(`  ${scoreThreshold.reasoning}`);

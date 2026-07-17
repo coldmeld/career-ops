@@ -49,7 +49,6 @@ async function main() {
     process.exit(1);
   }
 
-=======
 const CJK_RE = /[぀-ヿ㐀-鿿豈-﫿ｦ-ﾟ가-힯ᄀ-ᇿ]/;
 
 /**

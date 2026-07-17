@@ -44,16 +44,6 @@ export function formatReportNumber(num) {
   return String(num).padStart(3, '0');
 }
 
-<<<<<<< HEAD
-/** Return the highest numeric slot currently taken in reports/ (files + sentinels). */
-function maxSlot() {
-  if (!existsSync(REPORTS_DIR)) return 0;
-  const entries = readdirSync(REPORTS_DIR);
-  let max = 0;
-  for (const name of entries) {
-    const m = name.match(/^(\d+)-/);
-    if (m) max = Math.max(max, parseInt(m[1], 10));
-=======
 function reportsDirFor(options = {}) {
   return resolve(options.reportsDir
     || process.env.CAREER_OPS_REPORTS_DIR
@@ -74,7 +64,6 @@ function occupiedFromReports(reportsDir) {
     if (!match) continue;
     const num = parseInt(match[1], 10);
     if (Number.isInteger(num) && num > 0) occupied.add(num);
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   }
   return occupied;
 }
@@ -298,14 +287,6 @@ async function runCli() {
   const [,, cmd, arg] = process.argv;
   const options = {};
 
-<<<<<<< HEAD
-const [,, cmd, arg] = process.argv;
-
-if (cmd === '--release') {
-  if (!arg || !/^\d+$/.test(arg)) {
-    process.stderr.write('Usage: node reserve-report-num.mjs --release <NNN>\n');
-    process.exit(1);
-=======
   if (cmd === '--release') {
     const match = (arg || '').match(/^(\d+)(?:-(\d+))?$/);
     if (!match) {
@@ -325,7 +306,6 @@ if (cmd === '--release') {
       { ...options, force: true },
     );
     return 0;
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   }
 
   if (cmd === '--gc') {

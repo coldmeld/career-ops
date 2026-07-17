@@ -221,8 +221,7 @@ export function repoRelativeManifestPath(pathValue) {
   return rel.split(sep).join('/');
 }
 
-<<<<<<< HEAD
-=======
+
 export function injectPrintPageCss(html, format = 'a4') {
   const normalizedFormat = String(format || 'a4').toLowerCase();
   const pageSize = normalizedFormat === 'letter' ? 'Letter' : 'A4';
@@ -239,7 +238,7 @@ export function injectPrintPageCss(html, format = 'a4') {
   return `${pageStyle}\n${html}`;
 }
 
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+
 /**
  * Record a generated PDF in data/pdf-index.tsv so tools can map a tracker
  * report number to the exact PDF (and its source HTML for regeneration).
@@ -423,9 +422,7 @@ export async function inlineLocalFonts(html) {
  *
  * @param {string} html - Full HTML document to render.
  * @param {string} outputPath - Absolute path to write the PDF to.
-<<<<<<< HEAD
- * @param {{format?: 'a4'|'letter', baseDir?: string, reportNum?: string, inputPath?: string}} [opts]
-=======
+
  * @param {{
  *   format?: 'a4'|'letter',
  *   baseDir?: string,
@@ -433,7 +430,6 @@ export async function inlineLocalFonts(html) {
  *   inputPath?: string,
  *   launchBrowser?: (options: {headless: boolean}) => Promise<import('playwright').Browser>
  * }} [opts]
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
  * @returns {Promise<{outputPath: string, pageCount: number, size: number}>}
  */
 export async function renderHtmlToPdf(html, outputPath, opts = {}) {

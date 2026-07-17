@@ -9,11 +9,7 @@
 
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-<<<<<<< HEAD
-import { loadRegistry, validateRegistryEntry } from './plugins/_registry.mjs';
-=======
 import { loadRegistry, loadRegistryFiles, validateRegistryEntry } from './plugins/_registry.mjs';
->>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 import { HOOK_KINDS, RESERVED_ENV } from './plugins/_engine.mjs';
 
 const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
