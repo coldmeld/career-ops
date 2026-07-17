@@ -58,7 +58,11 @@ export function CvEditor() {
           onClick={save}
           disabled={saving || !dirty}
           className={cn(
+<<<<<<< HEAD
             "inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors",
+=======
+            "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors max-sm:min-h-[44px]",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
             dirty
               ? "bg-brand text-brand-foreground hover:bg-brand-200"
               : "border border-border bg-surface text-muted",

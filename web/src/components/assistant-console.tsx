@@ -12,6 +12,10 @@ import { usePipeline } from "@/components/pipeline/pipeline-provider";
 import { useApply } from "@/components/apply/apply-provider";
 import { useExplore } from "@/components/explore/explore-provider";
 import { WorkerCard } from "@/components/jobs/worker-card";
+<<<<<<< HEAD
+=======
+import { Button } from "@/components/ui/button";
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 import { dispatch, type ActionCtx, type DoneInfo } from "@/app/actions/registry";
 import { scoreNum } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -474,7 +478,11 @@ export function AssistantConsole() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
+<<<<<<< HEAD
           className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full border border-border bg-surface/90 py-1.5 pl-1.5 pr-4 shadow-lg backdrop-blur transition-colors hover:bg-surface-hover"
+=======
+          className="fixed bottom-5 right-5 z-50 flex items-center justify-center gap-2 rounded-full border border-border bg-surface/90 py-1.5 pl-1.5 pr-4 shadow-lg backdrop-blur transition-colors hover:bg-surface-hover max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           aria-label="Open assistant"
         >
           <CoMark size={26} />
@@ -490,12 +498,21 @@ export function AssistantConsole() {
               <div className="text-sm font-semibold tracking-tight">Assistant</div>
               <div className="text-xs text-faint">{cliId ? `via ${cliId}` : "no CLI configured"}</div>
             </div>
+<<<<<<< HEAD
             <button onClick={resetChat} className="rounded-md p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-foreground" aria-label="New chat" title="New chat">
               <RotateCcw className="size-4" />
             </button>
             <button onClick={() => setOpen(false)} className="rounded-md p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-foreground" aria-label="Close assistant">
               <X className="size-4" />
             </button>
+=======
+            <Button variant="ghost" size="icon" onClick={resetChat} className="text-muted" aria-label="New chat" title="New chat">
+              <RotateCcw className="size-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className="text-muted" aria-label="Close assistant">
+              <X className="size-4" />
+            </Button>
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           </header>
 
           <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">

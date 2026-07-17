@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Career-Ops -- AI Job Search Pipeline
 
 ## Origin
@@ -372,5 +373,8 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 **Source of truth (full descriptions + aliases):** `templates/states.yml`. The 8 canonical states (use exactly one): `Evaluated` · `Applied` · `Responded` · `Interview` · `Offer` · `Rejected` · `Discarded` · `SKIP`.
 
 **RULES:** no markdown bold (`**`), no dates (those go in the date column), no extra text (use the notes column) in the status field.
+=======
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 @AGENTS.md
-<!-- Add anything Claude Code specific that other agents don't need -->
+
+<!-- Add Claude Code-specific guidance here only when it has no AGENTS.md counterpart. -->

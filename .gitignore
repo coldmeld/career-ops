@@ -3,13 +3,29 @@ cv.md
 data/applications.md
 data/applications.db
 data/follow-ups.md
+<<<<<<< HEAD
+=======
+data/salary-observations.tsv
+data/status-log.tsv
+data/assessments.tsv
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 data/pipeline.md
 data/scan-history.tsv
+data/scan-runs.tsv
+data/portal-health.tsv
+data/blacklist.md
 data/pdf-index.tsv
+data/agent-inbox.md
+data/active-interviews.md
+data/reply-candidates.json
 data/parser-output/**/*.json
 !data/parser-output/.gitkeep
 !data/parser-output/**/.gitkeep
 data/cache/ats-companies/
+# Received offers/contracts, promise notes, prep reports (PII — never commit)
+data/offers/*
+!data/offers/.gitkeep
+data/upskill/
 reports/*.md
 !reports/.gitkeep
 output/*
@@ -33,6 +49,7 @@ jds/*
 
 # Interview prep (accumulated STAR+R stories — user data)
 interview-prep/*
+!interview-prep/
 !interview-prep/.gitkeep
 # Session transcripts hold real interviewer names/companies — ignore content,
 # ship only the system-owned scaffold (README + .gitkeep). #1242
@@ -47,11 +64,14 @@ writing-samples/*
 
 # User config and customization (never auto-updated)
 config/profile.yml
+config/cv-facts.json
+config/benchmarks.yml
 portals.yml
 modes/_profile.md
 modes/_custom.md
 .update-dismissed
 .update-lock
+.manifesto-noted
 
 # Plugin layer — opt-in toggles + user-installed plugins + integrity lock (never auto-updated)
 config/plugins.yml
@@ -99,6 +119,7 @@ package-lock.json
 
 # Planning (local scratchpad)
 plan/
+<<<<<<< HEAD
 CLAUDE.md
 AGENTS.md
 modes/pdf.md
@@ -123,3 +144,8 @@ tectonic
 texlive/
 tokenless-scripts.md
 urgent.md
+=======
+
+# Web
+.career-ops-web/logo-cache/
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae

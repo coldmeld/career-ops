@@ -1,6 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { atomicWrite } from "@/lib/core/safe-write";
+<<<<<<< HEAD
+=======
+import { parseApplications } from "@/lib/tracker-table.mjs";
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
 /**
  * Resolve the career-ops "home" — the directory holding the user's sibling
@@ -44,7 +48,11 @@ function read(rel: string): string | null {
   }
 }
 
+<<<<<<< HEAD
 export type InboxJob = { url: string; company: string; role: string; location?: string; compensation?: string; done: boolean };
+=======
+export type InboxJob = { url: string; company: string; role: string; location?: string; compensation?: string; done: boolean; postedAt?: string };
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
 /** Parse data/pipeline.md — `- [ ] URL | Company | Role [| Location [| Compensation]]`.
  *  Positional split (NOT a greedy trailing group): the optional 4th `location`
@@ -71,10 +79,44 @@ export function readInbox(): InboxJob[] {
   return jobs;
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Read data/scan-history.tsv → Map<url, first_seen(YYYY-MM-DD)>. The scanner
+ * already stamps every discovered posting with the date it was first seen
+ * (col 2), so we derive the inbox's freshness signal here WITHOUT touching the
+ * core (see the inbox-triage build: freshness = option A, no scanner change).
+ * Tolerant by construction: no file → empty map (freshness facet just hides);
+ * a malformed row is skipped, never thrown (missing ≠ corrupt).
+ */
+export function readScanDates(): Map<string, string> {
+  const tsv = read("data/scan-history.tsv");
+  const dates = new Map<string, string>();
+  if (!tsv) return dates;
+  const lines = tsv.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line || (i === 0 && line.startsWith("url\t"))) continue; // skip header
+    const tab = line.indexOf("\t");
+    if (tab < 1) continue;
+    const url = line.slice(0, tab);
+    const firstSeen = line.slice(tab + 1).split("\t")[0]?.trim();
+    // keep the EARLIEST first_seen if a url recurs (it's "first" seen, after all)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(firstSeen) && !dates.has(url)) dates.set(url, firstSeen);
+  }
+  return dates;
+}
+
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 export type Application = {
   n: string;
   date: string;
   company: string;
+<<<<<<< HEAD
+=======
+  /** Intermediary channel (#1596): agency/recruiter firm, "—" for direct, "" when the tracker has no Via column. */
+  via: string;
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   role: string;
   score: string;
   status: string;
@@ -85,12 +127,20 @@ export type Application = {
 
 /**
  * Parse data/applications.md — the tracker table (source of truth).
+<<<<<<< HEAD
  * Column order: # | Date | Company | Role | Score | Status | PDF | Report | Notes
  * (note: score BEFORE status, per the core data contract).
+=======
+ * The header-aware parsing lives in tracker-table.mjs, which resolves headers
+ * through the SAME alias table the Node tooling uses (tracker-aliases.json,
+ * exported by tracker-parse.mjs as HEADER_ALIASES) — one shared source, no
+ * web-side mirror to drift (#954, PR #1598 review).
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
  */
 export function readApplications(): Application[] {
   const md = read("data/applications.md");
   if (!md) return [];
+<<<<<<< HEAD
   const rows: Application[] = [];
   for (const raw of md.split("\n")) {
     const line = raw.trim();
@@ -104,6 +154,9 @@ export function readApplications(): Application[] {
     rows.push({ n, date, company, role, score, status, pdf, report, notes: rest.join(" | ") });
   }
   return rows;
+=======
+  return parseApplications(md, careerOpsRoot());
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 }
 
 /**
@@ -162,10 +215,20 @@ export type PipelineSummary = {
 
 export function pipelineSummary(): PipelineSummary {
   const root = careerOpsRoot();
+<<<<<<< HEAD
   return {
     root,
     rootExists: fs.existsSync(root),
     inbox: readInbox(),
+=======
+  const scanDates = readScanDates();
+  return {
+    root,
+    rootExists: fs.existsSync(root),
+    // join the freshness date (first_seen) onto each raw posting — the inbox's
+    // triage view orders/faceted-filters on it entirely client-side.
+    inbox: readInbox().map((j) => ({ ...j, postedAt: scanDates.get(j.url) })),
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     applications: readApplications(),
   };
 }

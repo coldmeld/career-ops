@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+<<<<<<< HEAD
 import { Search, ExternalLink, ChevronsUpDown, Sparkles, Loader2, X } from "lucide-react";
 import type { Application, InboxJob } from "@/lib/career-ops";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,17 @@ import { canonStatus, scoreNum, scoreTone, statusDot } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
 // INBOX (the action queue) is the default tab; the rest filter the tracker.
+=======
+import { Search, ChevronsUpDown, X, Compass, ArrowRight } from "lucide-react";
+import type { Application, InboxJob } from "@/lib/career-ops";
+import { Badge } from "@/components/ui/badge";
+import { CompanyLogo } from "@/components/company-logo";
+import { canonStatus, scoreNum, scoreTone, statusDot } from "@/lib/format";
+import { InboxTriage } from "@/components/inbox/inbox-triage";
+import { cn } from "@/lib/cn";
+
+// INBOX (the triage queue) is the default tab; the rest filter the tracker.
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 const TABS = [
   "INBOX",
   "ALL",
@@ -36,7 +48,10 @@ export function PipelineView({
   applications: Application[];
   inbox: InboxJob[];
 }) {
+<<<<<<< HEAD
   const { jobs, startJob } = useJobs();
+=======
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -77,6 +92,7 @@ export function PipelineView({
     [params, router, pathname],
   );
 
+<<<<<<< HEAD
   const pendingInbox = useMemo(() => inbox.filter((j) => !j.done), [inbox]);
 
   // Link each inbox posting to its worker (by URL) so the row can show
@@ -109,6 +125,20 @@ export function PipelineView({
       return pa - pb;
     });
   }, [pendingInbox, q, jobByUrl]);
+=======
+  // Pending + deduped by URL (pipeline.md can list the same posting twice) so the
+  // header count, the tab count and the triage list all agree on one number.
+  const pendingInbox = useMemo(() => {
+    const seen = new Set<string>();
+    const out: InboxJob[] = [];
+    for (const j of inbox) {
+      if (j.done || seen.has(j.url)) continue;
+      seen.add(j.url);
+      out.push(j);
+    }
+    return out;
+  }, [inbox]);
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
   const filtered = useMemo(() => {
     if (tab === "INBOX") return [];
@@ -137,11 +167,16 @@ export function PipelineView({
   }, [applications, tab, q, sort, minFilter]);
 
   return (
+<<<<<<< HEAD
     <div className="mx-auto max-w-6xl px-6 py-8">
+=======
+    <div className="mx-auto max-w-6xl px-6 py-8 max-sm:pb-24">
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl tracking-tight text-landing">Pipeline</h1>
           <p className="mt-1 text-sm text-muted">
+<<<<<<< HEAD
             <span className="tabular-nums">{pendingInbox.length - processedCount}</span> in inbox
             {processedCount > 0 && (
               <>
@@ -161,6 +196,24 @@ export function PipelineView({
             className="w-full rounded-md border border-border bg-surface/60 py-2 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-faint focus:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand/40"
           />
         </div>
+=======
+            <span className="tabular-nums">{pendingInbox.length}</span> in inbox ·{" "}
+            <span className="tabular-nums">{applications.length}</span> tracked
+          </p>
+        </div>
+        {/* the tracker has its own search; the inbox brings its own facet filters */}
+        {tab !== "INBOX" && (
+          <div className="relative w-64 max-w-[40vw]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search company or role…"
+              className="w-full rounded-md border border-border bg-surface/60 py-2 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-faint focus:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand/40"
+            />
+          </div>
+        )}
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       </div>
 
       {/* tabs */}
@@ -168,7 +221,11 @@ export function PipelineView({
         {TABS.map((t) => {
           const count =
             t === "INBOX"
+<<<<<<< HEAD
               ? pendingInbox.length - processedCount
+=======
+              ? pendingInbox.length
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
               : t === "ALL"
                 ? applications.length
                 : applications.filter((r) => canonStatus(r.status).includes(t)).length;
@@ -177,7 +234,11 @@ export function PipelineView({
               key={t}
               onClick={() => setParams({ tab: t === "INBOX" ? null : t })}
               className={cn(
+<<<<<<< HEAD
                 "-mb-px border-b-2 px-3 py-2 text-xs font-medium transition-colors",
+=======
+                "-mb-px inline-flex items-center justify-center border-b-2 px-3 py-2 text-xs font-medium transition-colors max-sm:min-h-[44px]",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
                 tab === t
                   ? "border-brand text-foreground"
                   : "border-transparent text-muted hover:text-foreground",
@@ -205,6 +266,7 @@ export function PipelineView({
       )}
 
       {tab === "INBOX" ? (
+<<<<<<< HEAD
         /* ── Inbox: the action queue with worker triggers ── */
         filteredInbox.length > 0 ? (
           <ul className="mt-4 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
@@ -272,6 +334,13 @@ export function PipelineView({
           </ul>
         ) : (
           <InboxEmpty count={pendingInbox.length} filtered={q.trim().length > 0} />
+=======
+        /* ── Inbox: the triage surface (Abundance → Triage → Shortlist → Score) ── */
+        pendingInbox.length > 0 ? (
+          <InboxTriage inbox={pendingInbox} />
+        ) : (
+          <InboxEmpty count={0} filtered={false} />
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
         )
       ) : filtered.length > 0 ? (
         /* ── Tracker table ── */
@@ -330,7 +399,12 @@ export function PipelineView({
   );
 }
 
+<<<<<<< HEAD
 // Empty inbox = the app's terminal-card cue (CLI heritage spent once, honestly).
+=======
+// Empty inbox. Self-sufficient for the mainstream user (a primary in-web action),
+// honest for devs (the CLI/file path stays, demoted to progressive transparency).
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 function InboxEmpty({ count, filtered }: { count: number; filtered: boolean }) {
   if (filtered) {
     return (
@@ -346,6 +420,7 @@ function InboxEmpty({ count, filtered }: { count: number; filtered: boolean }) {
         <span className="size-2.5 rounded-full bg-foreground/15" aria-hidden="true" />
         <span className="size-2.5 rounded-full bg-foreground/15" aria-hidden="true" />
         <span className="size-2.5 rounded-full bg-foreground/15" aria-hidden="true" />
+<<<<<<< HEAD
         <span className="ml-3 font-mono text-xs tracking-wide text-muted">
           <span className="text-foreground/40">&gt;_</span> career-ops scan
         </span>
@@ -366,6 +441,31 @@ function InboxEmpty({ count, filtered }: { count: number; filtered: boolean }) {
             className="cli-cursor ml-0.5 inline-block h-[1em] w-[0.35em] bg-current align-middle"
           />
         </p>
+=======
+        <span className="ml-3 font-mono text-xs tracking-wide text-muted">career-ops · inbox</span>
+      </div>
+      <div className="px-6 py-10 text-center">
+        <p className="font-display text-lg">
+          Your <span className="text-brand">inbox</span> is empty.
+        </p>
+        {count > 0 ? (
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted">Nothing pending right now.</p>
+        ) : (
+          <>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted">Find roles that match your CV — free, no tokens spent.</p>
+            <Link
+              href="/explore?run=1"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-brand-foreground shadow-sm transition-all duration-200 hover:bg-brand-200 hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <Compass className="size-4" /> Run your first free scan <ArrowRight className="size-4" />
+            </Link>
+            <p className="mx-auto mt-4 max-w-sm text-xs text-muted">
+              Prefer the terminal? Run <code className="rounded bg-surface-hover px-1 py-0.5 font-mono">career-ops scan</code>, or add job URLs to{" "}
+              <code className="rounded bg-surface-hover px-1 py-0.5 font-mono">data/pipeline.md</code>.
+            </p>
+          </>
+        )}
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       </div>
     </div>
   );

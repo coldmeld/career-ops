@@ -1,21 +1,37 @@
 {
   "name": "@career-ops/web",
+<<<<<<< HEAD
   "version": "0.0.0",
+=======
+  "version": "0.3.0",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   "private": true,
   "description": "Official web experience for career-ops — local-first.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+<<<<<<< HEAD
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@paper-design/shaders-react": "^0.0.76",
+=======
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test-clean-chips.mjs"
+  },
+  "dependencies": {
+    "@paper-design/shaders-react": "^0.0.77",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "js-yaml": "^4.2.0",
     "lucide-react": "^1.8.0",
+<<<<<<< HEAD
     "next": "16.2.3",
+=======
+    "next": "16.2.10",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     "playwright-core": "^1.61.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",

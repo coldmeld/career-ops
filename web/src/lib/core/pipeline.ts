@@ -27,6 +27,12 @@ export function addOffersToPipeline(offers: DiscoveredOffer[]): Promise<AddResul
       title: o.title || "",
       location: o.location || "",
       source: o.source || o.ats || "explorer",
+<<<<<<< HEAD
+=======
+      // Preserve the optional per-offer signal so it survives to pipeline.md.
+      // The core writer treats an empty note as absent (byte-identical output).
+      note: o.note || "",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     }));
   if (clean.length === 0) return Promise.resolve({ added: 0 });
 

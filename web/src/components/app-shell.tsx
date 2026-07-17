@@ -44,14 +44,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                     active
+<<<<<<< HEAD
                       ? "bg-brand-soft text-brand"
+=======
+                      ? "bg-brand-soft text-brand-text"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
                       : "text-muted hover:bg-surface-hover hover:text-foreground",
                   )}
                 >
                   <Icon className="size-4" />
                   {label}
                   {chip && (
+<<<<<<< HEAD
                     <span className="ml-auto rounded-full border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand">
+=======
+                    <span className="ml-auto rounded-full border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand-text">
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
                       {chip}
                     </span>
                   )}

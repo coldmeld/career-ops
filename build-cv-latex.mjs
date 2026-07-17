@@ -4,11 +4,15 @@ import { readFile, writeFile, stat } from 'fs/promises';
 import { existsSync } from 'fs';
 import { resolve, dirname, basename, join } from 'path';
 import { fileURLToPath } from 'url';
+import { tmpdir } from 'os';
+import { escapeLatex, sanitizeUrl } from './lib/latex-escape.mjs';
+import { resolveTemplate } from './cv-templates.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_PATH = resolve(__dirname, 'templates', 'cv-template.tex');
 const PLACEHOLDER_RE = /\{\{[A-Z_]+\}\}/g;
 
+<<<<<<< HEAD
 function escapeLatex(text, mode = 'text') {
   if (typeof text !== 'string') return '';
   if (mode === 'url') return text;
@@ -59,6 +63,8 @@ function buildCompetencies(items) {
   return items.map(item => `\\textbf{${escapeLatex(item)}}`).join(' $\\cdot$ ');
 }
 
+=======
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 function buildEducation(entries) {
   if (!Array.isArray(entries) || entries.length === 0) return '';
   const blocks = [];
@@ -151,12 +157,30 @@ async function main() {
     process.exit(1);
   }
 
-  if (!existsSync(TEMPLATE_PATH)) {
-    console.error(`Template not found: ${TEMPLATE_PATH}`);
+  // Honor a selected .tex template variant (cv.template default or --template=<name>),
+  // falling back to the base cv-template.tex when no variant exists.
+  const texName = (process.argv.find((a) => a.startsWith('--template=')) || '').split('=')[1];
+  let TEMPLATE_PATH_RESOLVED;
+  try {
+    TEMPLATE_PATH_RESOLVED = resolveTemplate('cv', texName, { format: 'tex', fallback: true });
+  } catch {
+    TEMPLATE_PATH_RESOLVED = TEMPLATE_PATH;
+  }
+
+  if (!existsSync(TEMPLATE_PATH_RESOLVED)) {
+    console.error(`Template not found: ${TEMPLATE_PATH_RESOLVED}`);
     process.exit(1);
   }
 
-  let template = await readFile(TEMPLATE_PATH, 'utf-8');
+  let template = await readFile(TEMPLATE_PATH_RESOLVED, 'utf-8');
+
+  // Projects is the one CV section that's genuinely optional (education,
+  // experience, and skills are effectively always present) — drop the whole
+  // Personal Projects \section when there are no entries, instead of leaving
+  // a bare section header with nothing under it.
+  if (!Array.isArray(payload.projects) || payload.projects.length === 0) {
+    template = template.replace(/%%%%%%%%%%%%%%%%%%%%%%%%%%%%  PROJECTS  %%%%%%%%%%%%%%%%%%%%%%%%%%%%[\s\S]*?(?=%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Technical Skills)/, '');
+  }
 
   const emailUrl = sanitizeUrl(payload.email?.url || '');
   const emailDisplay = payload.email?.display || emailUrl;
@@ -274,9 +298,9 @@ async function runSelfTest() {
     ],
   };
 
-  const testOutput = '/tmp/build-cv-latex-test.tex';
+  const testOutput = join(tmpdir(), 'build-cv-latex-test.tex');
   const raw = JSON.stringify(sample, null, 2);
-  const tmpInput = '/tmp/build-cv-latex-test-input.json';
+  const tmpInput = join(tmpdir(), 'build-cv-latex-test-input.json');
   await writeFile(tmpInput, raw, 'utf-8');
 
   const absInput = resolve(tmpInput);

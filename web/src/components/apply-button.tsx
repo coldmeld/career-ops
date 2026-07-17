@@ -24,7 +24,11 @@ export function ApplyButton({ n, url, company, pdfReady }: { n: string; url?: st
         type="button"
         disabled
         title={!hasUrl ? "No application URL on this report" : "Generate the tailored CV (PDF) first to apply"}
+<<<<<<< HEAD
         className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-border bg-surface/40 px-3.5 py-1 text-xs font-medium text-faint"
+=======
+        className="inline-flex cursor-not-allowed items-center justify-center gap-1.5 rounded-full border border-border bg-surface/40 px-3.5 py-1 text-xs font-medium text-faint max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       >
         <Lock className="size-3.5" /> Apply
       </button>
@@ -37,7 +41,11 @@ export function ApplyButton({ n, url, company, pdfReady }: { n: string; url?: st
         apply.open(url!, { prefill: true, company });
         router.push("/apply");
       }}
+<<<<<<< HEAD
       className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-1 text-xs font-medium text-brand-foreground shadow-sm transition-colors hover:bg-brand-200"
+=======
+      className="inline-flex items-center justify-center gap-1.5 rounded-full bg-brand px-3.5 py-1 text-xs font-medium text-brand-foreground shadow-sm transition-colors hover:bg-brand-200 max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       title="Apply — opens the form pre-filled, you review and submit yourself"
     >
       <Send className="size-3.5" /> Apply
