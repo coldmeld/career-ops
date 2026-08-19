@@ -161,10 +161,14 @@ export function TodayDashboard({
           </div>
           {fresh.length > 6 && (
 <<<<<<< HEAD
+<<<<<<< HEAD
             <Link href="/explore" className="mt-3 inline-block text-sm text-muted transition hover:text-brand">
 =======
             <Link href="/explore" className="mt-3 inline-flex items-center text-sm text-muted transition hover:text-brand max-sm:min-h-[44px]">
 >>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+=======
+            <Link href="/explore?view=fresh" className="mt-3 inline-flex items-center text-sm text-muted transition hover:text-brand max-sm:min-h-[44px]">
+>>>>>>> 21e9c3e2c291bc65b5545623ad788c0bb4326eb9
               See all {fresh.length} →
             </Link>
           )}
