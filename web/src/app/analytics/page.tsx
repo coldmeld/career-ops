@@ -4,6 +4,7 @@ import Link from "next/link";
 >>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 import { pipelineSummary } from "@/lib/career-ops";
 import { canonStatus, scoreNum } from "@/lib/format";
+import { cumulativeTiles } from "@/lib/funnel-tiles.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ const STAGES: { key: string; label: string }[] = [
   { key: "RESPONDED", label: "Responded" },
   { key: "INTERVIEW", label: "Interview" },
   { key: "OFFER", label: "Offer" },
+  { key: "HIRED", label: "Hired" },
   { key: "REJECTED", label: "Rejected" },
   { key: "DISCARDED", label: "Discarded" },
 ];
@@ -42,8 +44,12 @@ export default function Analytics() {
   const topCompanies = [...companyCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
   const maxCompany = Math.max(1, ...topCompanies.map((c) => c[1]));
 
-  const offers = stageCounts.find((s) => s.key === "OFFER")?.n ?? 0;
-  const interviews = stageCounts.find((s) => s.key === "INTERVIEW")?.n ?? 0;
+  // CUMULATIVE, unlike the stage bars above: these two tiles are achievement
+  // counters whose zero-state shows a coaching nudge, so a candidate who has
+  // already advanced past a stage must not read 0 for it (an offer-holder was
+  // told "Interviews follow replies — keep follow-ups warm"). Mirrors
+  // everInterview/everOffer in stats.mjs's computeFunnel().
+  const { interviews, offers } = cumulativeTiles(applications.map((a) => canonStatus(a.status)));
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
