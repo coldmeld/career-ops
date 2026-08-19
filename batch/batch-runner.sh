@@ -384,6 +384,7 @@ next_report_num_unlocked() {
       local basename
       basename=$(basename "$f")
       local num="${basename%%-*}"
+      [[ "$num" =~ ^[0-9]+$ ]] || continue  # skip non-numeric prefixes (e.g. pattern-analysis-*.md)
       num=$((10#$num)) # Remove leading zeros for arithmetic
       if (( num > max_num )); then
         max_num=$num
@@ -394,6 +395,7 @@ next_report_num_unlocked() {
   if [[ -f "$STATE_FILE" ]]; then
     while IFS=$'\t' read -r _ _ _ _ _ rnum _ _ _; do
       [[ "$rnum" == "report_num" || "$rnum" == "-" || -z "$rnum" ]] && continue
+      [[ "$rnum" =~ ^[0-9]+$ ]] || continue  # skip non-integer report_num (e.g. malformed entries)
       local n=$((10#$rnum))
       if (( n > max_num )); then
         max_num=$n
