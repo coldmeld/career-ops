@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 >>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 import { dispatch, type ActionCtx, type DoneInfo } from "@/app/actions/registry";
 import { scoreNum } from "@/lib/format";
+import { pendingActOpenerStart } from "@/lib/act-envelope.mjs";
 import { cn } from "@/lib/cn";
 
 // ── message model: messages are PART arrays so a live worker card can render
@@ -75,6 +76,11 @@ function parseEnvelopes(acc: string): { complete: Env[]; hidePartialFrom: number
     }
     complete.push({ start, end: close + 2, id: m[1], argsJson: acc.slice(argsStart, close).trim() });
   }
+  // The regex above only sees an opener once its id letters AND trailing space
+  // have streamed in. Also hide a shorter trailing partial (`<<`, `<<act:sav`)
+  // so it doesn't flicker into the bubble before the space arrives (#2290-class).
+  const pending = pendingActOpenerStart(acc);
+  if (pending >= 0 && (hidePartialFrom === -1 || pending < hidePartialFrom)) hidePartialFrom = pending;
   return { complete, hidePartialFrom };
 }
 function removeRanges(s: string, cuts: [number, number][]): string {
