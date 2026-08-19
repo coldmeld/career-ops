@@ -6,7 +6,11 @@ import { cn } from "@/lib/cn";
 // density and reserve the one rounded-full pill for the Today hero CTA
 // (expressed inline, not a variant — avoids pill overuse).
 export const buttonVariants = cva(
+<<<<<<< HEAD
   "inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50",
+=======
+  "inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 max-sm:min-h-[44px]",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   {
     variants: {
       variant: {
@@ -15,7 +19,11 @@ export const buttonVariants = cva(
         ghost: "hover:bg-surface-hover hover:text-foreground",
         secondary: "border border-border bg-surface text-foreground hover:bg-surface-hover",
       },
+<<<<<<< HEAD
       size: { sm: "px-2 py-1.5 text-xs", icon: "p-1.5", default: "" },
+=======
+      size: { sm: "px-2 py-1.5 text-xs", icon: "p-1.5 max-sm:min-w-[44px]", default: "" },
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     },
     defaultVariants: { variant: "primary", size: "default" },
   },

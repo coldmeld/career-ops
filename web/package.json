@@ -1,21 +1,52 @@
 {
   "name": "@career-ops/web",
+<<<<<<< HEAD
+<<<<<<< HEAD
   "version": "0.0.0",
+=======
+  "version": "0.3.0",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+=======
+  "version": "0.7.0",
+>>>>>>> 21e9c3e2c291bc65b5545623ad788c0bb4326eb9
   "private": true,
   "description": "Official web experience for career-ops — local-first.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+<<<<<<< HEAD
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@paper-design/shaders-react": "^0.0.76",
+=======
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"tests/**/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+<<<<<<< HEAD
+    "@paper-design/shaders-react": "^0.0.77",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+=======
+    "@paper-design/shaders-react": "^0.0.78",
+>>>>>>> 21e9c3e2c291bc65b5545623ad788c0bb4326eb9
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.1",
     "lucide-react": "^1.8.0",
+<<<<<<< HEAD
+<<<<<<< HEAD
     "next": "16.2.3",
+=======
+    "next": "16.2.10",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+=======
+    "next": "16.3.0",
+>>>>>>> 21e9c3e2c291bc65b5545623ad788c0bb4326eb9
     "playwright-core": "^1.61.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
@@ -29,8 +60,12 @@
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.9",
+    "postcss": "^8.5.18",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2"
+  },
+  "overrides": {
+    "postcss": "^8.5.18",
+    "sharp": "^0.35.0"
   }
 }

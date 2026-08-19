@@ -59,7 +59,11 @@ function parseOfferLine(source: string, date: string, rest: string): Omit<Discov
 // Does the user's LOCAL scanner support the --json contract (#1199)? Probe the
 // source (cheap, no spawn) so older checkouts fall back instead of breaking on an
 // unknown flag — the web is local-first, so the version is whatever they installed.
+<<<<<<< HEAD
 function scannerSupportsJson(): boolean {
+=======
+export function scannerSupportsJson(): boolean {
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   try {
     const src = fs.readFileSync(rootScript("scan-ats-full"), "utf8");
     return src.includes("--json") && src.includes("capHit");

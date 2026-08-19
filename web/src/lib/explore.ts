@@ -49,6 +49,13 @@ export type DiscoveredOffer = {
   source: string;
   /** which positive keyword matched the title (transparency, e.g. "ai" in "Nail") */
   matchedKeyword?: string;
+<<<<<<< HEAD
+=======
+  /** optional free-text ranking signal preserved to pipeline.md by the canonical
+   *  writer (scan.mjs formatPipelineOffer). Generic and source-agnostic — an
+   *  importer can attach a note; the deterministic scan omits it. */
+  note?: string;
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   // ── AI-search (modes/discover.md) additions — all optional, so the
   //    deterministic scan offer is unaffected (fields simply absent). ──
   /** present ONLY on AI offers → drives the "unverified" badge. AI finds can't be
@@ -88,6 +95,7 @@ export type ScanEvent =
   | { kind: "error"; message: string }
   | { kind: "done"; count: number; offers: DiscoveredOffer[]; cost?: { tokens: number; usd: number } };
 
+<<<<<<< HEAD
 const CHIP_CAP = 16;
 
 /** Trim, drop empties, de-dupe case-insensitively, cap length. */
@@ -109,6 +117,13 @@ export function cleanChips(v: unknown): string[] {
   }
   return out;
 }
+=======
+// cleanChips is defined in clean-chips.mjs (plain JS) so it can be shared
+// with the test suite without a TypeScript runner. Import for internal use
+// and re-export for external consumers (filter-builder.tsx, etc.).
+import { cleanChips } from "./clean-chips.mjs";
+export { cleanChips };
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
 function clampNum(v: unknown, lo: number, hi: number, fallback: number): number {
   const n = Number(v);
