@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { tmpdir } from 'os';
 import { escapeLatex, sanitizeUrl } from './lib/latex-escape.mjs';
 import { resolveTemplate } from './cv-templates.mjs';
+import { stripEmptySections } from './cv-sections-core.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_PATH = resolve(__dirname, 'templates', 'cv-template.tex');
@@ -106,6 +107,21 @@ function buildCompetencies(items) {
   return items.map(c => escapeLatex(c)).join(' $|$ ');
 }
 
+// Awards are one line each — no bullet list — so they reuse
+// \resumeProjectHeading (bold left column, year right) rather than
+// \resumeSubheading, which would leave an empty second row. The issuing body
+// follows the title in the same $|$ style buildProjects() uses for context.
+function buildAwards(entries) {
+  if (!Array.isArray(entries) || entries.length === 0) return '';
+  const blocks = [];
+  for (const e of entries) {
+    if (!e) continue;
+    const org = e.org ? ` \\emph{$|$ ${escapeLatex(e.org)}}` : '';
+    blocks.push(`    \\resumeProjectHeading\n      {\\textbf{${escapeLatex(e.title)}}${org}}{${escapeLatex(e.year)}}`);
+  }
+  return blocks.join('\n\n');
+}
+
 function buildSkills(categories) {
   if (!Array.isArray(categories) || categories.length === 0) return '';
   return categories.map(c => {
@@ -172,13 +188,9 @@ async function main() {
 
   let template = await readFile(TEMPLATE_PATH_RESOLVED, 'utf-8');
 
-  // Projects is the one CV section that's genuinely optional (education,
-  // experience, and skills are effectively always present) — drop the whole
-  // Personal Projects \section when there are no entries, instead of leaving
-  // a bare section header with nothing under it.
-  if (!Array.isArray(payload.projects) || payload.projects.length === 0) {
-    template = template.replace(/%%%%%%%%%%%%%%%%%%%%%%%%%%%%  PROJECTS  %%%%%%%%%%%%%%%%%%%%%%%%%%%%[\s\S]*?(?=%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Technical Skills)/, '');
-  }
+  // Drop the optional sections (projects, education) that have no entries, so
+  // an absent one leaves no bare header behind. See cv-sections-core.mjs.
+  template = stripEmptySections(template, payload, 'tex');
 
   const emailUrl = sanitizeUrl(payload.email?.url || '');
   const emailDisplay = payload.email?.display || emailUrl;
@@ -205,11 +217,17 @@ async function main() {
     EDUCATION: buildEducation(payload.education),
     EXPERIENCE: buildExperience(payload.experience),
     PROJECTS: buildProjects(payload.projects),
+    AWARDS: buildAwards(payload.awards),
     SKILLS: buildSkills(payload.skills),
   };
 
+  // Replacer FUNCTION, not a string: escapeLatex turns `$` into `\$` but leaves
+  // the next character alone, so a bullet containing `$'` survives as the JS
+  // replacement pattern meaning "everything after the match" and splices the
+  // rest of the template into the document — silently, with a valid-looking
+  // exit 0. A replacer function's return value is inserted literally.
   for (const [key, value] of Object.entries(substitutions)) {
-    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), () => value);
   }
 
   const unresolved = template.match(PLACEHOLDER_RE);
@@ -236,6 +254,7 @@ async function main() {
       educationEntries: (payload.education || []).length,
       experienceEntries: (payload.experience || []).length,
       projectEntries: (payload.projects || []).length,
+      awardEntries: (payload.awards || []).length,
       skillCategories: (payload.skills || []).length,
       totalBullets: (() => {
         const ex = Array.isArray(payload.experience) ? payload.experience.flatMap(e => Array.isArray(e?.bullets) ? e.bullets : []) : [];
@@ -284,6 +303,10 @@ async function runSelfTest() {
         'Built a REST API with automated test coverage exceeding 90%',
       ],
     }],
+    awards: [
+      { title: 'Gold Medal, International Olympiad in Informatics', org: 'IOI', year: '2023' },
+      { title: "Dean's List", org: 'Test University', year: '2022' },
+    ],
     skills: [
       { category: 'Languages', items: 'Python, JavaScript, TypeScript' },
       { category: 'Frameworks', items: 'FastAPI, React, PyTorch' },
@@ -328,11 +351,13 @@ async function runSelfTest() {
     EDUCATION: buildEducation(sample.education),
     EXPERIENCE: buildExperience(sample.experience),
     PROJECTS: buildProjects(sample.projects),
+    AWARDS: buildAwards(sample.awards),
     SKILLS: buildSkills(sample.skills),
   };
 
+  // Replacer function, same reason as the render path above.
   for (const [key, value] of Object.entries(substitutions)) {
-    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), () => value);
   }
 
   const unresolved = template.match(PLACEHOLDER_RE);
@@ -361,6 +386,7 @@ async function runSelfTest() {
       educationEntries: sample.education.length,
       experienceEntries: sample.experience.length,
       projectEntries: sample.projects.length,
+      awardEntries: sample.awards.length,
       skillCategories: sample.skills.length,
       totalBullets: (() => {
         const ex = Array.isArray(sample.experience) ? sample.experience.flatMap(e => Array.isArray(e?.bullets) ? e.bullets : []) : [];
