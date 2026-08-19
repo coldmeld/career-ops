@@ -13,46 +13,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_PATH = resolve(__dirname, 'templates', 'cv-template.tex');
 const PLACEHOLDER_RE = /\{\{[A-Z_]+\}\}/g;
 
-function escapeLatex(text, mode = 'text') {
-  if (typeof text !== 'string') return '';
-  if (mode === 'url') return text;
-  const out = [];
-  for (const ch of text) {
-    switch (ch) {
-      case '\\': out.push('\\textbackslash{}'); break;
-      case '{': case '}': out.push('\\' + ch); break;
-      case '^': out.push('\\textasciicircum{}'); break;
-      case '~': out.push('\\textasciitilde{}'); break;
-      case '_': out.push('\\_'); break;
-      case '&': out.push('\\&'); break;
-      case '%': out.push('\\%'); break;
-      case '$': out.push('\\$'); break;
-      case '#': out.push('\\#'); break;
-      case '\u00B1': out.push('$\\pm$'); break;
-      case '\u2192': out.push('$\\rightarrow$'); break;
-      default: out.push(ch);
-    }
-  }
-  return out.join('');
-}
-
-function sanitizeUrl(url) {
-  if (typeof url !== 'string') return '';
-  url = url.trim();
-  if (!url) return '';
-  const allowedSchemes = ['mailto:', 'http:', 'https:'];
-  const hasScheme = allowedSchemes.some(s => url.toLowerCase().startsWith(s));
-  if (!hasScheme) {
-    if (url.includes('@') && !url.includes('/')) {
-      url = 'mailto:' + url;
-    } else {
-      url = 'https://' + url;
-    }
-  }
-  url = url.replace(/[{}%$#\\~^]/g, '');
-  return url;
-}
-
 function buildSummary(text) {
   if (!text) return '';
   return escapeLatex(text);
@@ -102,6 +62,8 @@ function buildProjects(entries) {
   return `%%%%%%%%%%%%%%%%%%%%%%%%%%%%  PROJECTS  %%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\\section{Personal Projects}\n\\resumeSubHeadingListStart\n${blocks.join('\n\n')}\n\\resumeSubHeadingListEnd\n`;
 }
 
+<<<<<<< HEAD
+=======
 function buildCompetencies(items) {
   if (!Array.isArray(items) || items.length === 0) return '';
   return items.map(c => escapeLatex(c)).join(' $|$ ');
@@ -122,6 +84,7 @@ function buildAwards(entries) {
   return blocks.join('\n\n');
 }
 
+>>>>>>> cc4099b7837b34f8428218c7c423eb3d8885e6f2
 function buildSkills(categories) {
   if (!Array.isArray(categories) || categories.length === 0) return '';
   return categories.map(c => {
