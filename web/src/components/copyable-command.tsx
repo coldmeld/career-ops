@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
+<<<<<<< HEAD
+=======
+import { Button } from "@/components/ui/button";
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 import { cn } from "@/lib/cn";
 
 // Single-line monospace command + copy-to-clipboard — ported from the
@@ -44,19 +48,33 @@ export function CopyableCommand({
       >
         Copied
       </span>
+<<<<<<< HEAD
       <button
+=======
+      <Button
+        variant="ghost"
+        size="icon"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
         type="button"
         onClick={handleCopy}
         aria-label={copied ? "Copied to clipboard" : "Copy command"}
         title={copied ? "Copied" : "Copy"}
+<<<<<<< HEAD
         className="inline-flex shrink-0 items-center justify-center rounded-md p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+=======
+        className="shrink-0 text-muted"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       >
         {copied ? (
           <CheckIcon className="size-4 text-brand" aria-hidden="true" />
         ) : (
           <CopyIcon className="size-4" aria-hidden="true" />
         )}
+<<<<<<< HEAD
       </button>
+=======
+      </Button>
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
     </div>
   );
 }

@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
+<<<<<<< HEAD
+=======
+import { Button } from "@/components/ui/button";
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 import { cn } from "@/lib/cn";
 
 const KEY = "career-ops:theme";
@@ -29,11 +33,18 @@ export function ThemeToggle({ className }: { className?: string }) {
   }
 
   return (
+<<<<<<< HEAD
     <button
+=======
+    <Button
+      variant="ghost"
+      size="icon"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       type="button"
       onClick={toggle}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
       title={dark ? "Light mode" : "Dark mode"}
+<<<<<<< HEAD
       className={cn(
         "inline-flex items-center justify-center rounded-md p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-foreground",
         className,
@@ -41,5 +52,11 @@ export function ThemeToggle({ className }: { className?: string }) {
     >
       {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </button>
+=======
+      className={cn("text-muted", className)}
+    >
+      {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+    </Button>
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   );
 }

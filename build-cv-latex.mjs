@@ -4,6 +4,10 @@ import { readFile, writeFile, stat } from 'fs/promises';
 import { existsSync } from 'fs';
 import { resolve, dirname, basename, join } from 'path';
 import { fileURLToPath } from 'url';
+import { tmpdir } from 'os';
+import { escapeLatex, sanitizeUrl } from './lib/latex-escape.mjs';
+import { resolveTemplate } from './cv-templates.mjs';
+import { stripEmptySections } from './cv-sections-core.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_PATH = resolve(__dirname, 'templates', 'cv-template.tex');
@@ -54,6 +58,12 @@ function buildSummary(text) {
   return escapeLatex(text);
 }
 
+function buildCompetencies(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+  return items.map(item => `\\textbf{${escapeLatex(item)}}`).join(' $\\cdot$ ');
+}
+
+
 function buildEducation(entries) {
   if (!Array.isArray(entries) || entries.length === 0) return '';
   const blocks = [];
@@ -94,7 +104,22 @@ function buildProjects(entries) {
 
 function buildCompetencies(items) {
   if (!Array.isArray(items) || items.length === 0) return '';
-  return items.map(c => escapeLatex(c)).join(' $\\cdot$ ');
+  return items.map(c => escapeLatex(c)).join(' $|$ ');
+}
+
+// Awards are one line each — no bullet list — so they reuse
+// \resumeProjectHeading (bold left column, year right) rather than
+// \resumeSubheading, which would leave an empty second row. The issuing body
+// follows the title in the same $|$ style buildProjects() uses for context.
+function buildAwards(entries) {
+  if (!Array.isArray(entries) || entries.length === 0) return '';
+  const blocks = [];
+  for (const e of entries) {
+    if (!e) continue;
+    const org = e.org ? ` \\emph{$|$ ${escapeLatex(e.org)}}` : '';
+    blocks.push(`    \\resumeProjectHeading\n      {\\textbf{${escapeLatex(e.title)}}${org}}{${escapeLatex(e.year)}}`);
+  }
+  return blocks.join('\n\n');
 }
 
 function buildSkills(categories) {
@@ -146,12 +171,26 @@ async function main() {
     process.exit(1);
   }
 
-  if (!existsSync(TEMPLATE_PATH)) {
-    console.error(`Template not found: ${TEMPLATE_PATH}`);
+  // Honor a selected .tex template variant (cv.template default or --template=<name>),
+  // falling back to the base cv-template.tex when no variant exists.
+  const texName = (process.argv.find((a) => a.startsWith('--template=')) || '').split('=')[1];
+  let TEMPLATE_PATH_RESOLVED;
+  try {
+    TEMPLATE_PATH_RESOLVED = resolveTemplate('cv', texName, { format: 'tex', fallback: true });
+  } catch {
+    TEMPLATE_PATH_RESOLVED = TEMPLATE_PATH;
+  }
+
+  if (!existsSync(TEMPLATE_PATH_RESOLVED)) {
+    console.error(`Template not found: ${TEMPLATE_PATH_RESOLVED}`);
     process.exit(1);
   }
 
-  let template = await readFile(TEMPLATE_PATH, 'utf-8');
+  let template = await readFile(TEMPLATE_PATH_RESOLVED, 'utf-8');
+
+  // Drop the optional sections (projects, education) that have no entries, so
+  // an absent one leaves no bare header behind. See cv-sections-core.mjs.
+  template = stripEmptySections(template, payload, 'tex');
 
   const emailUrl = sanitizeUrl(payload.email?.url || '');
   const emailDisplay = payload.email?.display || emailUrl;
@@ -171,16 +210,24 @@ async function main() {
     EMAIL_URL: emailUrl,
     EMAIL_DISPLAY: escapeLatex(emailDisplay),
     SOCIAL_LINKS: socialLinks,
+    SUMMARY: buildSummary(payload.summary),
+    SOCIAL_LINKS: socialLinks,
     SUMMARY_TEXT: escapeLatex(payload.summary_text || ''),
     COMPETENCIES: buildCompetencies(payload.competencies),
     EDUCATION: buildEducation(payload.education),
     EXPERIENCE: buildExperience(payload.experience),
     PROJECTS: buildProjects(payload.projects),
+    AWARDS: buildAwards(payload.awards),
     SKILLS: buildSkills(payload.skills),
   };
 
+  // Replacer FUNCTION, not a string: escapeLatex turns `$` into `\$` but leaves
+  // the next character alone, so a bullet containing `$'` survives as the JS
+  // replacement pattern meaning "everything after the match" and splices the
+  // rest of the template into the document — silently, with a valid-looking
+  // exit 0. A replacer function's return value is inserted literally.
   for (const [key, value] of Object.entries(substitutions)) {
-    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), () => value);
   }
 
   const unresolved = template.match(PLACEHOLDER_RE);
@@ -207,6 +254,7 @@ async function main() {
       educationEntries: (payload.education || []).length,
       experienceEntries: (payload.experience || []).length,
       projectEntries: (payload.projects || []).length,
+      awardEntries: (payload.awards || []).length,
       skillCategories: (payload.skills || []).length,
       totalBullets: (() => {
         const ex = Array.isArray(payload.experience) ? payload.experience.flatMap(e => Array.isArray(e?.bullets) ? e.bullets : []) : [];
@@ -228,7 +276,7 @@ async function runSelfTest() {
     email: { url: 'test@example.com', display: 'test@example.com' },
     linkedin: { url: 'https://linkedin.com/in/test', display: 'linkedin.com/in/test' },
     github: { url: 'https://github.com/test', display: 'github.com/test' },
-    summary: 'Experienced engineer with a strong background in testing and automation. Skilled in building reliable systems and driving continuous improvement across cross-functional teams.',
+    summary_text: 'Experienced engineer with a strong background in testing and automation. Skilled in building reliable systems and driving continuous improvement across cross-functional teams.',
     competencies: ['Automated Testing', 'CI/CD Pipelines', 'Python', 'System Design', 'Cross-functional Collaboration'],
     education: [{
       institution: 'Test University',
@@ -255,15 +303,19 @@ async function runSelfTest() {
         'Built a REST API with automated test coverage exceeding 90%',
       ],
     }],
+    awards: [
+      { title: 'Gold Medal, International Olympiad in Informatics', org: 'IOI', year: '2023' },
+      { title: "Dean's List", org: 'Test University', year: '2022' },
+    ],
     skills: [
       { category: 'Languages', items: 'Python, JavaScript, TypeScript' },
       { category: 'Frameworks', items: 'FastAPI, React, PyTorch' },
     ],
   };
 
-  const testOutput = '/tmp/build-cv-latex-test.tex';
+  const testOutput = join(tmpdir(), 'build-cv-latex-test.tex');
   const raw = JSON.stringify(sample, null, 2);
-  const tmpInput = '/tmp/build-cv-latex-test-input.json';
+  const tmpInput = join(tmpdir(), 'build-cv-latex-test-input.json');
   await writeFile(tmpInput, raw, 'utf-8');
 
   const absInput = resolve(tmpInput);
@@ -299,11 +351,13 @@ async function runSelfTest() {
     EDUCATION: buildEducation(sample.education),
     EXPERIENCE: buildExperience(sample.experience),
     PROJECTS: buildProjects(sample.projects),
+    AWARDS: buildAwards(sample.awards),
     SKILLS: buildSkills(sample.skills),
   };
 
+  // Replacer function, same reason as the render path above.
   for (const [key, value] of Object.entries(substitutions)) {
-    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+    template = template.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), () => value);
   }
 
   const unresolved = template.match(PLACEHOLDER_RE);
@@ -332,6 +386,7 @@ async function runSelfTest() {
       educationEntries: sample.education.length,
       experienceEntries: sample.experience.length,
       projectEntries: sample.projects.length,
+      awardEntries: sample.awards.length,
       skillCategories: sample.skills.length,
       totalBullets: (() => {
         const ex = Array.isArray(sample.experience) ? sample.experience.flatMap(e => Array.isArray(e?.bullets) ? e.bullets : []) : [];

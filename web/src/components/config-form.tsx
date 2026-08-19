@@ -11,6 +11,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { CadenceSettings } from "@/components/followups/cadence-settings";
 
 type Cli = {
   id: string;
@@ -87,26 +88,42 @@ export function ConfigForm() {
     <div className="mx-auto max-w-2xl px-6 py-10">
       <h1 className="font-display text-2xl tracking-tight text-landing">Config</h1>
       <p className="mt-1 text-sm text-muted">
+<<<<<<< HEAD
         career-ops is CLI-agnostic — it runs on your own AI, locally. Nothing leaves your machine.
+=======
+        Run career-ops on your own AI, right on your computer. Your CV and data never leave your machine.
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       </p>
 
       {/* Engine mode */}
       <label className="mt-8 mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+<<<<<<< HEAD
         Engine
+=======
+        AI Engine
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       </label>
       <div className="grid gap-2 sm:grid-cols-3">
         <ModeCard
           active={mode === "cli"}
           onClick={() => setMode("cli")}
           icon={Terminal}
+<<<<<<< HEAD
           title="Installed CLI"
+=======
+          title="Use an AI tool you have"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           hint="Recommended"
         />
         <ModeCard
           active={mode === "key"}
           onClick={() => setMode("key")}
           icon={KeyRound}
+<<<<<<< HEAD
           title="API key"
+=======
+          title="Paste an AI key"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           hint="Coming soon"
           disabled
         />
@@ -114,7 +131,11 @@ export function ConfigForm() {
           active={mode === "manual"}
           onClick={() => setMode("manual")}
           icon={TerminalSquare}
+<<<<<<< HEAD
           title="Keyless"
+=======
+          title="No setup needed"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           hint="Coming soon"
           disabled
         />
@@ -123,6 +144,7 @@ export function ConfigForm() {
       <div className="mt-6">
         {mode === "cli" && (
           <div>
+<<<<<<< HEAD
             <p className="mb-3 text-sm text-muted">
               career-ops runs through whichever AI coding CLI you already use — already authenticated,
               your own tokens, nothing to paste. Detected on this machine:
@@ -130,6 +152,22 @@ export function ConfigForm() {
             {clis === null ? (
               <div className="flex items-center gap-2 text-sm text-muted">
                 <Loader2 className="size-4 animate-spin" /> Scanning your PATH…
+=======
+            <p className="mb-1 text-sm text-muted">
+              career-ops uses an AI tool you already have — signed in, your own usage, nothing to paste.
+            </p>
+            <p className="mb-3 text-xs text-faint">Works with Claude Code, Codex, OpenCode and more — free ones work great.</p>
+            {clis === null ? (
+              <div className="flex items-center gap-2 text-sm text-muted">
+                <Loader2 className="size-4 animate-spin" /> Checking what&apos;s on your computer…
+              </div>
+            ) : installed.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border bg-surface/30 p-4 text-sm text-muted">
+                No AI tool yet? Free options like <span className="text-foreground">OpenCode</span> with Qwen or GLM work great.{" "}
+                <a href="https://career-ops.org/docs/free-ai-engine" target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-brand hover:underline">
+                  Get one free <ExternalLink className="size-3" />
+                </a>
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
               </div>
             ) : (
               <div className="space-y-2">
@@ -157,7 +195,11 @@ export function ConfigForm() {
                         disabled={!c.installed}
                         onClick={() => setCliId(c.id)}
                         className={cn(
+<<<<<<< HEAD
                           "flex flex-1 items-center gap-2 text-left",
+=======
+                          "flex flex-1 items-center gap-2 text-left max-sm:min-h-[44px]",
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
                           c.installed ? "" : "cursor-default",
                         )}
                       >
@@ -180,7 +222,11 @@ export function ConfigForm() {
                           href={c.url}
                           target="_blank"
                           rel="noreferrer"
+<<<<<<< HEAD
                           className="inline-flex shrink-0 items-center gap-1 text-xs text-brand hover:underline"
+=======
+                          className="inline-flex shrink-0 items-center justify-center gap-1 text-xs text-brand hover:underline max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
                         >
                           Install <ExternalLink className="size-3" />
                         </a>
@@ -227,9 +273,16 @@ export function ConfigForm() {
               </div>
             </div>
             <div>
+<<<<<<< HEAD
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                 API key
               </label>
+=======
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                Paste an AI key
+              </label>
+              <p className="mb-2 text-xs text-faint">Bring a key from OpenAI, Anthropic, and others.</p>
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
               <input
                 type="password"
                 value={apiKey}
@@ -247,8 +300,12 @@ export function ConfigForm() {
 
         {mode === "manual" && (
           <div className="rounded-xl border border-dashed border-border bg-surface/30 p-4 text-sm text-muted">
+<<<<<<< HEAD
             Keyless mode: career-ops generates the prompts and you paste them into whichever AI tool
             you already use, then paste the result back. Zero keys, zero cost beyond what you already pay.
+=======
+            The easiest way in — no keys, nothing to set up. On the roadmap.
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
           </div>
         )}
       </div>
@@ -284,16 +341,26 @@ export function ConfigForm() {
         </span>
       </button>
 
+      <CadenceSettings />
+
       <div className="mt-8 flex items-center gap-3">
         <button
           type="button"
           onClick={save}
+<<<<<<< HEAD
           className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200"
+=======
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200 max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
         >
           {saved ? <Check className="size-4" /> : null}
           {saved ? "Saved" : "Save config"}
         </button>
+<<<<<<< HEAD
         <span className="text-xs text-faint">Local-first · on the #156 roadmap</span>
+=======
+        <span className="text-xs text-faint">Local-first · on our roadmap</span>
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
       </div>
     </div>
   );

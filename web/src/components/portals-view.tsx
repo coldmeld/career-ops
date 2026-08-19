@@ -54,7 +54,11 @@ export function PortalsView() {
         <button
           onClick={check}
           disabled={loading}
+<<<<<<< HEAD
           className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200 disabled:opacity-50"
+=======
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200 disabled:opacity-50 max-sm:min-h-[44px]"
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
         >
           {loading ? <Loader2 className="size-4 animate-spin" /> : <Radar className="size-4" />}
           Check portal health
@@ -88,8 +92,13 @@ export function PortalsView() {
                 scan
               </span>{" "}
               <span className="text-muted">
+<<<<<<< HEAD
                 — their ATS slug 404s. Fix the <code>careers_url</code> in <code>portals.yml</code> (or ask the assistant
                 to repair them).
+=======
+                — their careers link is broken. Fix the <code>careers_url</code> in <code>portals.yml</code> (or ask the
+                assistant to repair them).
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
               </span>
             </div>
           )}

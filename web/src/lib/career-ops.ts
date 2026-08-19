@@ -1,6 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { atomicWrite } from "@/lib/core/safe-write";
+<<<<<<< HEAD
+=======
+import { parseApplications } from "@/lib/tracker-table.mjs";
+<<<<<<< HEAD
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+=======
+// One definition of the `{n}-RESERVED.md` convention, shared with
+// run-cli-support.mjs — see report-files.mjs for why it lives there.
+import { isReservedReportFile } from "@/lib/report-files.mjs";
+>>>>>>> 21e9c3e2c291bc65b5545623ad788c0bb4326eb9
 
 /**
  * Resolve the career-ops "home" — the directory holding the user's sibling
@@ -44,12 +54,26 @@ function read(rel: string): string | null {
   }
 }
 
+<<<<<<< HEAD
 export type InboxJob = { url: string; company: string; role: string; location?: string; compensation?: string; done: boolean };
+=======
+export type InboxJob = { url: string; company: string; role: string; location?: string; compensation?: string; done: boolean; postedAt?: string };
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 
-/** Parse data/pipeline.md — `- [ ] URL | Company | Role [| Location [| Compensation]]`.
- *  Positional split (NOT a greedy trailing group): the optional 4th `location`
- *  (#1015) and 5th `compensation` (#1017) columns must NOT bleed into `role`;
- *  any further trailing columns are ignored gracefully. */
+/** A pipeline-row segment like `posted: 2026-07-14`, `trust: 62 stale` or
+ *  `note: …` — the core appends these LABELED segments after whatever
+ *  positional shape a row has (3/4/5 columns), so a naive positional reader
+ *  would misread them as location/compensation on short rows. Any
+ *  `word:`-prefixed segment is treated as labeled (forward-compatible with
+ *  labels the core hasn't invented yet). */
+const LABELED_SEGMENT = /^([a-z][a-z_-]*):\s*(.*)$/i;
+
+/** Parse data/pipeline.md — `- [ ] URL | Company | Role [| Location [| Compensation]] [| label: …]*`.
+ *  Positional split for the first columns (the optional 4th `location` #1015
+ *  and 5th `compensation` #1017 must NOT bleed into `role`); labeled segments
+ *  (posted:/trust:/note:/…) are filtered out of positional assignment wherever
+ *  they appear and surfaced when useful (posted: → postedAt). Unknown labels
+ *  and further trailing columns are ignored gracefully. */
 export function readInbox(): InboxJob[] {
   const md = read("data/pipeline.md");
   if (!md) return [];
@@ -57,8 +81,17 @@ export function readInbox(): InboxJob[] {
   for (const line of md.split("\n")) {
     const m = line.match(/^\s*-\s*\[([ xX])\]\s*(.+)$/);
     if (!m) continue;
-    const parts = m[2].split("|").map((s) => s.trim());
+    const all = m[2].split("|").map((s) => s.trim());
+    const labels = new Map<string, string>();
+    const parts: string[] = [];
+    for (const [i, seg] of all.entries()) {
+      // the URL cell can contain a colon-y value but is always position 0
+      const lm = i >= 3 ? seg.match(LABELED_SEGMENT) : null;
+      if (lm) labels.set(lm[1].toLowerCase(), lm[2].trim());
+      else parts.push(seg);
+    }
     if (parts.length < 3 || !parts[0]) continue; // need at least url | company | role
+    const posted = labels.get("posted");
     jobs.push({
       done: m[1].toLowerCase() === "x",
       url: parts[0],
@@ -66,15 +99,52 @@ export function readInbox(): InboxJob[] {
       role: parts[2],
       location: parts[3] || undefined, // optional 4th column (#1015)
       compensation: parts[4] || undefined, // optional 5th column (#1017); 6th+ ignored
+      // the row's own posting date (scan.mjs `posted:` label) — a more direct
+      // freshness signal than the scan-history join, which stays as fallback
+      postedAt: posted && /^\d{4}-\d{2}-\d{2}$/.test(posted) ? posted : undefined,
     });
   }
   return jobs;
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Read data/scan-history.tsv → Map<url, first_seen(YYYY-MM-DD)>. The scanner
+ * already stamps every discovered posting with the date it was first seen
+ * (col 2), so we derive the inbox's freshness signal here WITHOUT touching the
+ * core (see the inbox-triage build: freshness = option A, no scanner change).
+ * Tolerant by construction: no file → empty map (freshness facet just hides);
+ * a malformed row is skipped, never thrown (missing ≠ corrupt).
+ */
+export function readScanDates(): Map<string, string> {
+  const tsv = read("data/scan-history.tsv");
+  const dates = new Map<string, string>();
+  if (!tsv) return dates;
+  const lines = tsv.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line || (i === 0 && line.startsWith("url\t"))) continue; // skip header
+    const tab = line.indexOf("\t");
+    if (tab < 1) continue;
+    const url = line.slice(0, tab);
+    const firstSeen = line.slice(tab + 1).split("\t")[0]?.trim();
+    // keep the EARLIEST first_seen if a url recurs (it's "first" seen, after all)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(firstSeen) && !dates.has(url)) dates.set(url, firstSeen);
+  }
+  return dates;
+}
+
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 export type Application = {
   n: string;
   date: string;
   company: string;
+<<<<<<< HEAD
+=======
+  /** Intermediary channel (#1596): agency/recruiter firm, "—" for direct, "" when the tracker has no Via column. */
+  via: string;
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
   role: string;
   score: string;
   status: string;
@@ -85,12 +155,20 @@ export type Application = {
 
 /**
  * Parse data/applications.md — the tracker table (source of truth).
+<<<<<<< HEAD
  * Column order: # | Date | Company | Role | Score | Status | PDF | Report | Notes
  * (note: score BEFORE status, per the core data contract).
+=======
+ * The header-aware parsing lives in tracker-table.mjs, which resolves headers
+ * through the SAME alias table the Node tooling uses (tracker-aliases.json,
+ * exported by tracker-parse.mjs as HEADER_ALIASES) — one shared source, no
+ * web-side mirror to drift (#954, PR #1598 review).
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
  */
 export function readApplications(): Application[] {
   const md = read("data/applications.md");
   if (!md) return [];
+<<<<<<< HEAD
   const rows: Application[] = [];
   for (const raw of md.split("\n")) {
     const line = raw.trim();
@@ -104,6 +182,9 @@ export function readApplications(): Application[] {
     rows.push({ n, date, company, role, score, status, pdf, report, notes: rest.join(" | ") });
   }
   return rows;
+=======
+  return parseApplications(md, careerOpsRoot());
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
 }
 
 /**
@@ -162,29 +243,83 @@ export type PipelineSummary = {
 
 export function pipelineSummary(): PipelineSummary {
   const root = careerOpsRoot();
+<<<<<<< HEAD
   return {
     root,
     rootExists: fs.existsSync(root),
     inbox: readInbox(),
+=======
+  const scanDates = readScanDates();
+  return {
+    root,
+    rootExists: fs.existsSync(root),
+    // join the freshness date (first_seen) onto each raw posting — the inbox's
+    // triage view orders/faceted-filters on it entirely client-side.
+<<<<<<< HEAD
+    inbox: readInbox().map((j) => ({ ...j, postedAt: scanDates.get(j.url) })),
+>>>>>>> e14ec69774f99feb00dc10fc052e0b397d4d7cae
+=======
+    inbox: readInbox().map((j) => ({ ...j, postedAt: j.postedAt ?? scanDates.get(j.url) })),
+>>>>>>> 21e9c3e2c291bc65b5545623ad788c0bb4326eb9
     applications: readApplications(),
   };
 }
 
 export type ReportData = { content: string; file: string };
 
-/** Locate the evaluation report for an application number
- *  (reports/{n}-{slug}-{date}.md; the leading number may be zero-padded). */
+/** Locate the evaluation report for an application number.
+ *  The tracker row's own report link is authoritative: report FILE numbers can
+ *  differ from application numbers (e.g. app #309 → reports/308-…), so
+ *  resolving only by leading filename number misses those. Links are
+ *  normalized relative to the tracker file's directory (see #760). Falls back
+ *  to the filename scan (reports/{n}-{slug}-{date}.md, possibly zero-padded)
+ *  for rows without a parseable link.
+ *
+ *  Both the linked lookup and the fallback scan skip `{n}-RESERVED.md`
+ *  placeholder files.
+ *  `reserve-report-num.mjs` writes an empty `NNN-RESERVED.md` sentinel to
+ *  claim a report number before a worker has actually written the report;
+ *  it's normally deleted once the real report lands (or GC'd after 4h if
+ *  abandoned). But "RESERVED" sorts alphabetically before nearly every real
+ *  slug (company names start with lowercase/uppercase letters after the
+ *  number-dash, "R" often lands mid-alphabet or earlier), so if a sentinel
+ *  outlives its report — e.g. a worker was driven directly instead of
+ *  through the orchestrator that owns cleanup — `.find()` could return the
+ *  empty sentinel instead of the real report, making the report body and the
+ *  Apply/PDF-ready checks disappear. */
 export function findReportFile(n: string): string | null {
   const target = parseInt(n, 10);
   if (Number.isNaN(target)) return null;
+  const root = careerOpsRoot();
+  const app = readApplications().find((a) => parseInt(a.n, 10) === target);
+  const linked = app?.report.match(/\]\(([^)]+)\)/)?.[1];
+  if (linked) {
+    const p = path.resolve(root, "data", linked);
+    // Containment: a hand-edited link must not resolve outside the project.
+    if (p.endsWith(".md") && !isReservedReportFile(p) && containedRealpath(p, root)) return p;
+  }
   let files: string[];
   try {
-    files = fs.readdirSync(path.join(careerOpsRoot(), "reports"));
+    files = fs.readdirSync(path.join(root, "reports"));
   } catch {
     return null;
   }
-  const match = files.find((f) => f.endsWith(".md") && parseInt(f, 10) === target);
-  return match ? path.join(careerOpsRoot(), "reports", match) : null;
+  const match = files.find(
+    (f) => f.endsWith(".md") && !isReservedReportFile(f) && parseInt(f, 10) === target,
+  );
+  if (!match) return null;
+  const p = path.join(root, "reports", match);
+  return containedRealpath(p, root) ? p : null;
+}
+
+/** True containment check: resolves symlinks before comparing, so a link
+ *  planted under data/ or reports/ can't leak files outside the project. */
+function containedRealpath(p: string, root: string): boolean {
+  try {
+    return fs.realpathSync(p).startsWith(fs.realpathSync(root) + path.sep);
+  } catch {
+    return false; // missing file or unresolvable link — treat as not found
+  }
 }
 
 export function readReport(n: string): ReportData | null {

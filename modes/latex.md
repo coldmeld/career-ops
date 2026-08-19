@@ -11,7 +11,7 @@ Export a tailored, ATS-optimized CV as a `.tex` file and compile it to PDF via `
 5. Detect JD language → CV language (EN default)
 6. Detect role archetype → adapt framing
 7. Rewrite Professional Summary injecting JD keywords (same rules as `pdf` mode — NEVER invent skills)
-8. Select top 3-4 most relevant projects for the offer
+8. Select top 3-4 most relevant projects for the offer, and populate `awards[]` from `cv.md`'s Awards / Honors section when it has entries that support the role (omit the key otherwise — the section is dropped, header included; never invent an award)
 9. Reorder experience bullets by JD relevance
 10. Inject keywords naturally into existing achievements
 11. Build a JSON payload (see schema below) and write to `/tmp/cv-{candidate}-{company}.json`
@@ -69,6 +69,9 @@ Write a JSON file with this structure. `build-cv-latex.mjs` handles template mer
       ]
     }
   ],
+  "awards": [
+    { "title": "Gold Medal, International Olympiad in Informatics", "org": "IOI", "year": "2021" }
+  ],
   "skills": [
     { "category": "Languages", "items": "Python, JavaScript, C++" },
     { "category": "Frameworks", "items": "FastAPI, React, PyTorch" }
@@ -92,7 +95,7 @@ Write a JSON file with this structure. `build-cv-latex.mjs` handles template mer
 | `education[].location` | string | Institution location |
 | `education[].degree` | string | Degree name |
 | `education[].dates` | string | Date range |
-| `education[].coursework` | string[] | **DO NOT populate.** Coursework is excluded from output — omit this field entirely. |
+| `education[].coursework` | string[] | Optional — generates a coursework line if present |
 | `experience[].company` | string | From cv.md Experience |
 | `experience[].role` | string | Job title |
 | `experience[].location` | string | Work location |
@@ -102,13 +105,11 @@ Write a JSON file with this structure. `build-cv-latex.mjs` handles template mer
 | `projects[].context` | string | Tech stack — appears next to project name |
 | `projects[].dates` | string | Date range (or empty) |
 | `projects[].bullets` | string[] | Selected project achievements |
+| `awards[].title` | string | Award name, from cv.md Awards / Honors |
+| `awards[].org` | string | Optional — issuing body, rendered after the title |
+| `awards[].year` | string | Optional — year, right-aligned |
 | `skills[].category` | string | Skill category name (e.g. "Languages", "Frameworks") |
 | `skills[].items` | string | Comma-separated skills in that category |
-
-## Content exclusion rules
-
-- **No relevant coursework.** Never populate `education[].coursework` — omit the field entirely from the JSON payload.
-- **No personal projects from employment.** `projects[]` must only include standalone projects (open source, side projects, portfolio). Projects done as part of a job role go as bullets under `experience[].bullets`, not here.
 
 ## LaTeX Escaping (handled by the script)
 
@@ -134,7 +135,8 @@ Write a JSON file with this structure. `build-cv-latex.mjs` handles template mer
 ## ATS Rules (same as pdf mode)
 
 - Single-column layout (enforced by template)
-- Standard section headers: Education, Work Experience, Personal Projects, Technical Skills
+- Standard section headers: Education, Work Experience, Personal Projects, Awards & Honors, Technical Skills
+- Optional sections (Personal Projects, Education, Awards & Honors) are dropped entirely — header included — when their array is empty or absent
 - UTF-8, machine-readable via `\pdfgentounicode=1`
 - Keywords distributed: first bullet of each role, skills section
 - No images, no graphics, no color in body text
